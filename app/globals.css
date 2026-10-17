@@ -24,3 +24,23 @@ body {
   font-family: var(--font-body), monospace;
   font-size: 1.5rem;
 }
+
+/* Desktop pipeline layout: panels side by side. Applied by CSS alone so the
+   first paint already matches; GSAP only adds pinning and motion. */
+@custom-variant pipe (@media (min-width: 1024px) and (min-height: 600px) and (prefers-reduced-motion: no-preference));
+
+:root {
+  --hud-h: 3.5rem;
+}
+
+/* Original factory conveyor: steel rail with a tread pattern. */
+.belt {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 4rem;
+  border-top: 6px solid var(--orange);
+  background:
+    repeating-linear-gradient(90deg, transparent 0 22px, rgba(255, 140, 0, 0.35) 22px 26px),
+    linear-gradient(#1a1a22, #111118);
+}
