@@ -1,0 +1,113 @@
+# Udayverse — Personal Portfolio Website
+
+## What this is
+Uday's personal portfolio site. He is a master's student at San José State University (SJSU) applying for data engineering internships (also data analyst, ML engineering, software engineering, and product roles). The site should make a hiring manager think: "this person turns messy data into something useful, and builds things that are fun to use."
+
+## Core concept: a retro pixel-game data pipeline
+The page is one long, scroll-driven side-scroller styled like an old-school 8-bit/16-bit game. A pixel character travels through an ETL pipeline (Extract, Transform, Load), plus Serve and Query stages. **The character is the data**: it is assembled and upgraded as it moves through the pipeline, and at the end it becomes a polished pixel version of Uday.
+
+Image quality stands in for data quality:
+
+| Stage | What happens to the character | Project station |
+|---|---|---|
+| Intro | Pixel fragments fly in from sources (webpage, receipt, spreadsheet icons) | Name + one-line pitch |
+| 1. Extract | Fragments clump into a rough, glitchy 1-bit black-and-white blob | Internship tracker (job-posting ingestion + match/alert pipeline) |
+| Checkpoint | — | Everlaw internship (GTM data analyst) |
+| 2. Transform | Glitches scrubbed, pieces snap together into a recognizable 8-bit sprite that can walk | AisleSave (receipt OCR → clean grocery price data) |
+| 3. Load | Stored and comes out a stable, detailed 16-bit sprite | Data warehouse course project |
+| 4. Serve | Final polished pixel Uday, with signature item and a small celebration | Dashboard recommender (profiles datasets, suggests charts) |
+| 5. Query | "LOAD COMPLETE" → about, contact, and the terminal/agent | Ask Uday agent |
+
+When the character reaches a station it pauses (idle animation: blink/bounce) and a project card slides up.
+
+### Project card format
+- One-line problem it solves
+- What Uday built and his role
+- Tech stack (tags)
+- One result or number, if available
+- Links: GitHub, demo, screenshots
+
+All content lives in typed data files (see structure below), never hard-coded inside animation components.
+
+## Non-negotiable rules
+1. **Animation never blocks content.** No gates, minigames, or required typing. Scrolling fast must still work. A recruiter must reach projects and the resume within seconds.
+2. **The HUD is always visible**: name, current stage ("STAGE 2/5"), a "DATA QUALITY" bar that fills 0% → 100% with scroll progress, and buttons for Resume, GitHub, LinkedIn, Contact, and the terminal.
+3. **Mobile**: the pipeline runs vertically on small screens. No horizontal scrolling on phones.
+4. **Respect `prefers-reduced-motion`**: show a static version of the pipeline with all content visible.
+5. **A plain list view** of all projects exists at `/projects` for skimmers and search engines.
+6. **All art is original.** Factory / conveyor-belt / machinery style. No resemblance to Mario (no green warp pipes) or any other existing game character or IP.
+7. **Placeholder first**: use a simple colored square for the character until the pixel art is ready. The real sprites are added in Phase 5.
+8. Keep the site fast: target a Lighthouse performance score of 90+.
+
+## Tech stack
+- **Next.js** (App Router) + **TypeScript**
+- **Tailwind CSS** for styling
+- **GSAP** with ScrollTrigger for scroll-driven animation
+- Pixel art made in Piskel or Aseprite, exported as PNG sprite sheets; render with `image-rendering: pixelated`
+- Fonts: "Press Start 2P" for headings/HUD, "VT323" for body/terminal (via `next/font/google`)
+- Hosting: **Vercel**
+- Agent: Claude API called from a Next.js API route (server side only)
+
+## Suggested structure
+```
+app/
+  layout.tsx          # fonts, HUD, global styles
+  page.tsx            # the pipeline page
+  projects/page.tsx   # plain list view
+  api/ask/route.ts    # agent endpoint (Phase 7)
+components/
+  Hud.tsx
+  Pipeline.tsx        # scroll container + GSAP timeline
+  Station.tsx
+  ProjectCard.tsx
+  Character.tsx       # sprite + evolution stage
+  Terminal.tsx        # pop-up terminal (Phase 7)
+content/
+  projects.ts         # typed project data, one entry per station
+  site.ts             # name, pitch, about, links, resume path
+public/
+  resume.pdf
+  sprites/
+```
+
+## Visual style
+- Dark background, retro palette (base: near-black, accent orange `#ff8c00`, cyan `#00bfff`, green `#00ff41` — adjust during design phase)
+- Pixel borders on cards, chunky buttons, subtle CRT scanline overlay (optional, must be toggleable or very light)
+- Sound effects are optional and **off by default** with a mute toggle
+
+## Terminal + "Ask Uday" agent (Phase 7)
+- Opens as a pop-up from the HUD terminal icon or the backtick key (`` ` ``). Never opens automatically.
+- Built-in commands handled locally with no AI call: `help`, `projects`, `resume`, `about`, `contact`, `goto <stage>`, `clear`.
+- Anything else is sent to `/api/ask`, which answers questions about Uday using retrieval-augmented generation (RAG): look up relevant passages from `content/` and the resume, then answer from them.
+- Agent rules:
+  - Answer **only** from provided content. If it isn't there, say so and point to the contact section. Never invent experience, skills, or numbers.
+  - Keep answers short (2–4 sentences).
+  - Stay on topic (Uday's work, skills, projects); politely decline unrelated requests.
+- Safety and cost:
+  - API key only in server environment variables (`ANTHROPIC_API_KEY`), never in client code.
+  - Rate limit per IP (e.g. Upstash Redis or Vercel KV) and cap input length.
+  - Use a small, inexpensive Claude model.
+
+## Build phases
+Work one phase at a time. The site must be working and committed at the end of each phase.
+
+1. **Setup**: Next.js + TypeScript + Tailwind + GSAP, fonts, base layout, deploy a hello-world to Vercel.
+2. **Static content**: HUD and every section rendered with real content from `content/`, no animation. Must already be a usable portfolio. Build `/projects` list view.
+3. **Pipeline motion**: horizontal scroll pipeline with GSAP ScrollTrigger, placeholder square character moving along it, data-quality bar tied to scroll progress.
+4. **Stations**: character pauses at each station, project cards slide in, idle animation.
+5. **Responsive + accessibility**: vertical pipeline on mobile, reduced-motion fallback, keyboard navigation, alt text.
+6. **Pixel art**: swap in the real sprites, four evolution stages ending in pixel Uday with his signature item; fragment fly-in intro; celebration at Serve.
+7. **Terminal + agent**: pop-up terminal, local commands, `/api/ask` with RAG, rate limiting.
+8. **Polish + launch**: optional sound, final Lighthouse check, test on a real phone, custom domain.
+
+## Current status
+- **Phase 1 (Setup) complete.** Next.js (App Router, TypeScript, Tailwind v4, ESLint) + GSAP installed, Press Start 2P / VT323 fonts wired via `next/font/google` (CSS vars `--font-pixel`, `--font-body`), placeholder home page, git initialized. Vercel deploy is done by Uday. Next up: Phase 2 (static content, `/projects`).
+- Note: `AGENTS.md` is auto-generated by Next.js and tells agents to read `node_modules/next/dist/docs/` since this Next version differs from older docs.
+- Project card content still to be written (Uday will provide).
+- Pixel avatar details (appearance, signature item) to be decided before Phase 6.
+
+## Working conventions
+- Ask before adding new dependencies beyond the stack above.
+- Small, focused commits after each working step, with clear messages.
+- Explain changes in plain language; Uday is comfortable with code but new to Next.js and GSAP, so briefly explain framework-specific concepts when introducing them.
+- Update the "Current status" section of this file at the end of each phase.
