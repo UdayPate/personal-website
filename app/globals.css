@@ -136,11 +136,17 @@ body {
 
 /* final portrait for phones, reduced motion and no-JS: stage 4, first idle frame */
 .sprite-static {
-  --s: 4;
+  --s: 3;
   width: calc(32px * var(--s));
   height: calc(40px * var(--s));
   background: url(/sprites/stage-4.png) no-repeat 0 calc(-40px * var(--s)) / calc(128px * var(--s)) calc(120px * var(--s));
   image-rendering: pixelated;
+}
+
+@media (min-height: 800px) {
+  .sprite-static {
+    --s: 4;
+  }
 }
 
 /* intro: source icons + flying fragments (components/IntroArt.tsx) */

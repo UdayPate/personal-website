@@ -75,6 +75,7 @@ export default function IntroArt() {
         );
       });
       tl.to(icons, { opacity: 0.3, duration: 0.5 }, 0.1);
+      tl.to(icons[1], { opacity: 0, duration: 0.25 }, 0.65); // the middle icon sits where the blob appears
       tl.to(frags, { opacity: 0, duration: 0.1 }, 0.9);
       tl.fromTo(blob, { opacity: 0 }, { opacity: 1, duration: 0.12, immediateRender: true }, 0.88);
       tl.set({}, {}, 1); // timeline lasts exactly 1 unit
@@ -85,16 +86,23 @@ export default function IntroArt() {
 
   return (
     <>
-      <div className="mt-8 flex justify-center pipe:hidden">
+      {/* phones / reduced motion / no JS: the sources, then the finished character */}
+      <div className="mt-6 flex flex-col items-center gap-4 pipe:hidden">
+        <div aria-hidden className="flex items-center gap-5">
+          {SOURCES.map((s) => (
+            <div key={s.icon} className="intro-icon" style={{ ["--s" as string]: 3, ["--i" as string]: s.icon }} />
+          ))}
+        </div>
         <div role="img" aria-label="Pixel-art portrait of Uday holding a laptop" className="sprite-static" />
       </div>
-      <div ref={rootRef} aria-hidden className="relative mx-auto mt-6 hidden h-64 w-full max-w-3xl pipe:block">
+      {/* desktop with motion: icons in one row, the blob forms in the middle slot */}
+      <div ref={rootRef} aria-hidden className="relative mx-auto mt-10 hidden h-44 w-full max-w-3xl pipe:block">
         {SOURCES.map((s) => (
           <div
             key={s.icon}
             data-icon
-            className="intro-icon absolute top-2 -translate-x-1/2"
-            style={{ left: s.left, ["--i" as string]: s.icon }}
+            className="intro-icon absolute top-1/2 -translate-x-1/2 -translate-y-1/2"
+            style={{ left: s.left, ["--i" as string]: s.icon, ["--s" as string]: 5 }}
           />
         ))}
         {Array.from({ length: FRAGMENTS }, (_, i) => (
@@ -104,8 +112,8 @@ export default function IntroArt() {
           data-blob
           data-stage="1"
           data-anim="idle"
-          className="char absolute bottom-0 left-1/2 -translate-x-1/2"
-          style={{ ["--s" as string]: 3 }}
+          className="char absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+          style={{ ["--s" as string]: 4 }}
         >
           <div className="sprite" />
         </div>

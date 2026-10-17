@@ -10,15 +10,15 @@ export default function Home() {
   return (
     <main className="w-full flex-1 pb-16">
       <ScrollProgress />
-      <section className="px-4 py-12 text-center sm:py-16 pipe:flex pipe:min-h-[calc(100svh-var(--hud-h))] pipe:flex-col pipe:justify-center pipe:py-6">
-        <h1 className="font-pixel text-2xl leading-relaxed text-orange sm:text-4xl">
+      <section className="px-4 py-8 text-center sm:py-12 pipe:flex pipe:min-h-[calc(100svh-var(--hud-h))] pipe:flex-col pipe:justify-center pipe:py-6">
+        <h1 className="font-pixel text-2xl leading-relaxed text-orange sm:text-4xl pipe:text-5xl">
           {site.name.toUpperCase()}
         </h1>
-        <p className="mx-auto mt-6 max-w-xl text-2xl text-foreground">{site.pitch}</p>
-        <p className="mt-4 font-pixel text-xs leading-relaxed text-cyan sm:text-xs">
+        <p className="mx-auto mt-6 max-w-xl text-2xl text-foreground pipe:max-w-2xl pipe:text-3xl">{site.pitch}</p>
+        <p className="mt-4 font-pixel text-xs leading-relaxed text-cyan sm:text-xs pipe:text-sm">
           {site.subtitle}
         </p>
-        <div className="mt-8 flex flex-wrap justify-center gap-3">
+        <div className="mt-8 flex flex-wrap justify-center gap-3 pipe:mt-10">
           <a
             href="#aislesave"
             className="inline-flex min-h-11 items-center border-4 border-green px-4 font-pixel text-xs text-green hover:bg-green hover:text-background"
