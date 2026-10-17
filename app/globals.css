@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0a0a0f;
+  --foreground: #e8e8e8;
+  --orange: #ff8c00;
+  --cyan: #00bfff;
+  --green: #00ff41;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-orange: var(--orange);
+  --color-cyan: var(--cyan);
+  --color-green: var(--green);
+  --font-pixel: var(--font-pixel);
+  --font-body: var(--font-body);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body), monospace;
+  font-size: 1.5rem;
+}
