@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Press_Start_2P, VT323 } from "next/font/google";
+import Hud from "@/components/Hud";
 import "./globals.css";
 
 // next/font downloads these fonts at build time and serves them from our own
@@ -25,7 +26,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${pixel.variable} ${body.variable} h-full`}>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <Hud />
+        {children}
+      </body>
     </html>
   );
 }
