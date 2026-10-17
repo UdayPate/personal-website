@@ -1,4 +1,5 @@
 import { site, totalStages } from "@/content/site";
+import HudName from "./HudName";
 
 const btn =
   "border-2 border-cyan px-2 py-1 font-pixel text-[10px] text-cyan hover:bg-cyan hover:text-background focus-visible:outline-2 focus-visible:outline-orange";
@@ -7,9 +8,7 @@ export default function Hud() {
   return (
     <header className="sticky top-0 z-50 border-b-4 border-orange bg-background/95 px-3 py-2">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-4 gap-y-2">
-        <a href="#top" className="font-pixel text-xs text-orange">
-          {site.name.toUpperCase()}
-        </a>
+        <HudName name={site.name} />
         <span className="font-pixel text-[10px] text-foreground/70">
           {totalStages} STAGES
         </span>

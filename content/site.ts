@@ -19,7 +19,7 @@ export const site = {
     "Engineer by training, product thinker by habit. I build systems that people actually use.",
   subtitle: "Data · AI · Software · Product | MS @ SJSU",
   about:
-    "I'm a master's student in Applied Data Intelligence at San José State University (graduating Dec 2027), with a BS in Computer Science from UC Santa Cruz. I build end-to-end data systems, from ingestion and dbt models to warehouses, dashboards, and LLM agents grounded in real statistics. Most recently I was a GTM Data Analyst Intern at Everlaw, where my benchmarking dashboard moved to staging for company-wide rollout.",
+    "I'm a master's student in Applied Data Intelligence at San José State University (graduating Dec 2027), with a BS in Computer Science from UC Santa Cruz. I work across data, AI, software, and product: dbt pipelines and warehouses, LLM agents grounded in real statistics, and mobile and web apps where I led the product design. Most recently I was a GTM Data Analyst Intern at Everlaw, where my benchmarking dashboard moved to staging for company-wide rollout.",
   links: {
     github: "https://github.com/UdayPate",
     linkedin: "https://www.linkedin.com/in/upatelda/",

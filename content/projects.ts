@@ -9,7 +9,10 @@ export type Project = {
   title: string;
   dates?: string;
   problem?: string;
-  built: string;
+  /** 2-3 short bullets, facts taken only from `details`. */
+  summary: string[];
+  /** Full description shown on the project page. */
+  details: string;
   tech: string[];
   highlight?: string;
   links?: ProjectLinks;
@@ -28,9 +31,16 @@ export const projects: Project[] = [
   {
     slug: "aislesave",
     title: "AisleSave",
+    dates: "May 2026",
     problem:
       "Grocery prices are locked inside paper receipts, so shoppers can't compare them.",
-    built:
+    summary: [
+      "Extracts line items from receipt photos with OCR",
+      "Normalizes item names, removes duplicates, and compares prices across stores",
+      "Rule-based trust score shows how reliable each data point is",
+      "Owned product design and data processing on a two-person team",
+    ],
+    details:
       "A mobile app that extracts line items from receipt photos with OCR, then normalizes item names, removes duplicates, and compares prices across stores. A rule-based trust score shows how reliable each data point is. I owned product design and data processing on a two-person team.",
     tech: ["React Native", "Node/Express", "PostgreSQL (Supabase)", "OCR", "PostHog"],
     highlight: "Handles 20–60 line items per receipt; tested on ~200 real receipts",
@@ -41,7 +51,11 @@ export const projects: Project[] = [
     dates: "Mar 2026",
     problem:
       "Raw booking files aren't usable for analytics or recommendations until they're cleaned, modeled, and versioned.",
-    built:
+    summary: [
+      "Bronze/Silver/Gold Medallion pipeline in dbt on Snowflake, with SCD Type 2 history and a star-schema Gold layer",
+      "Gold layer exported to Neo4j, serving item-based collaborative-filtering recommendations through a Flask REST API",
+    ],
+    details:
       "Staged files in S3, loaded them into Snowflake, and built a Bronze/Silver/Gold Medallion pipeline in dbt with SCD Type 2 history and a star-schema Gold layer. Exported the Gold layer to Neo4j and served item-based collaborative-filtering recommendations through a Flask REST API.",
     tech: ["Snowflake", "dbt", "AWS S3", "SQL", "Python", "Neo4j", "Flask"],
     highlight: "11 incremental dbt models · 1,189-node / 5,500-relationship graph · 6 API endpoints",
@@ -52,7 +66,12 @@ export const projects: Project[] = [
     dates: "Jan 2026",
     problem:
       "Analyzing sales and warranty claims together across a million-plus records needs a solid schema and fast queries.",
-    built:
+    summary: [
+      "Normalized 5-table PostgreSQL database with 16+ analytical queries using CTEs and window functions",
+      "Demand forecasting via linear regression in pure SQL, validated against scikit-learn",
+      "Multi-page Streamlit dashboard",
+    ],
+    details:
       "A normalized 5-table PostgreSQL database, 16+ analytical queries using CTEs and window functions, demand forecasting via linear regression written in pure SQL (validated against scikit-learn), and a multi-page Streamlit dashboard.",
     tech: ["PostgreSQL", "SQL", "Streamlit", "Plotly"],
     highlight: "1M+ records · 85–97% query speedups from indexing",
@@ -60,9 +79,15 @@ export const projects: Project[] = [
   {
     slug: "data-lens",
     title: "Data Lens: Automated Dashboard Recommendation Platform",
+    dates: "Aug 2026",
     problem:
       "Teams build dashboards ad hoc, with no systematic way to know what's worth visualizing (a gap I saw firsthand at Everlaw).",
-    built:
+    summary: [
+      "Airflow-orchestrated pipeline ingests CSV/JSON/Parquet datasets into S3 and builds analysis-ready tables with Glue/PySpark and dbt",
+      "Distributed PySpark profiling engine computes chi-square, correlations with p-values, and changepoints",
+      "LLM agent recommends charts grounded only in that statistical evidence",
+    ],
+    details:
       "An Airflow-orchestrated pipeline that ingests any CSV/JSON/Parquet dataset into S3 and builds analysis-ready tables with Glue/PySpark and dbt plus data-quality tests; a distributed PySpark profiling engine computing real statistics (chi-square, correlations with p-values, changepoints); and an LLM agent layer that recommends charts grounded only in that statistical evidence, evaluated on precision, recall, and faithfulness.",
     tech: ["PySpark", "AWS (S3, Glue, Athena)", "Airflow", "dbt", "Python", "LLM agents"],
     highlight: "Profiling cut from 8 minutes to 90 seconds · 15 datasets across 3 domains · up to 1M rows",
@@ -71,8 +96,13 @@ export const projects: Project[] = [
     slug: "cricket-intelligence",
     title: "AI Cricket Intelligence Platform",
     dates: "Sep 2025",
-    problem: "Cricket predictions are more useful when they're accurate and explained.",
-    built:
+    problem: "Fans and analysts want cricket predictions they can trust and understand.",
+    summary: [
+      "LSTM and Transformer models predict IPL player runs, wickets, and win probability",
+      "RAG pipeline over player, team, venue, and match data",
+      "LLM-generated explanations in a Streamlit dashboard",
+    ],
+    details:
       "LSTM and Transformer models predicting IPL player runs, wickets, and win probability; a RAG pipeline over player, team, venue, and match data; and LLM-generated explanations in a Streamlit dashboard.",
     tech: ["Python", "PyTorch", "Transformers", "RAG", "PostgreSQL", "FastAPI", "Streamlit"],
     highlight: "Transformer reached 15.7 runs MAE vs. 18.4 for LSTM",
@@ -81,7 +111,12 @@ export const projects: Project[] = [
     slug: "cravely",
     title: "Cravely: Recipe Discovery Web App",
     dates: "Mar 2025",
-    built:
+    summary: [
+      "Led design and implementation of a full-stack recipe platform",
+      "RESTful APIs, authentication, and image handling",
+      "Uses TheMealDB data",
+    ],
+    details:
       "Led design and implementation of a full-stack recipe platform with RESTful APIs, authentication, image handling, and TheMealDB data.",
     tech: ["Py4Web", "Vue.js", "PostgreSQL", "HTML/CSS"],
     projectsOnly: true,

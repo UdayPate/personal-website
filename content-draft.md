@@ -6,7 +6,7 @@ Every number below comes from Uday's resume or his own project notes; do not add
 - Name: Uday Patel
 - Pitch (opening scene): Engineer by training, product thinker by habit. I build systems that people actually use.
 - Subtitle: Data · AI · Software · Product | MS @ SJSU
-- About: I'm a master's student in Applied Data Intelligence at San José State University (graduating Dec 2027), with a BS in Computer Science from UC Santa Cruz. I build end-to-end data systems, from ingestion and dbt models to warehouses, dashboards, and LLM agents grounded in real statistics. Most recently I was a GTM Data Analyst Intern at Everlaw, where my benchmarking dashboard moved to staging for company-wide rollout.
+- About: I'm a master's student in Applied Data Intelligence at San José State University (graduating Dec 2027), with a BS in Computer Science from UC Santa Cruz. I work across data, AI, software, and product: dbt pipelines and warehouses, LLM agents grounded in real statistics, and mobile and web apps where I led the product design. Most recently I was a GTM Data Analyst Intern at Everlaw, where my benchmarking dashboard moved to staging for company-wide rollout.
 - Links: GitHub https://github.com/UdayPate · LinkedIn https://www.linkedin.com/in/upatelda/ · Email pateluday0308@gmail.com
 - Resume: public/resume.pdf
 
@@ -26,7 +26,7 @@ Every number below comes from Uday's resume or his own project notes; do not add
 
 ---
 
-## Stage 1 · Extract — AisleSave
+## Stage 1 · Extract — AisleSave (May 2026)
 - Problem: Grocery prices are locked inside paper receipts, so shoppers can't compare them.
 - Built: A mobile app that extracts line items from receipt photos with OCR, then normalizes item names, removes duplicates, and compares prices across stores. A rule-based trust score shows how reliable each data point is. I owned product design and data processing on a two-person team.
 - Tech: React Native, Node/Express, PostgreSQL (Supabase), OCR, PostHog
@@ -56,7 +56,7 @@ Every number below comes from Uday's resume or his own project notes; do not add
 - Built 4 Tableau dashboards whose insights the CMO and CEO presented at the quarterly all-hands; rebuilt them in Looker (LookML) for a reporting-stack evaluation
 - Fixed broken sales-attribution logic in production dbt models
 
-## Stage 4 · Serve — Data Lens: Automated Dashboard Recommendation Platform
+## Stage 4 · Serve — Data Lens: Automated Dashboard Recommendation Platform (Aug 2026)
 - Problem: Teams build dashboards ad hoc, with no systematic way to know what's worth visualizing (a gap I saw firsthand at Everlaw).
 - Built: An Airflow-orchestrated pipeline that ingests any CSV/JSON/Parquet dataset into S3 and builds analysis-ready tables with Glue/PySpark and dbt plus data-quality tests; a distributed PySpark profiling engine computing real statistics (chi-square, correlations with p-values, changepoints); and an LLM agent layer that recommends charts grounded only in that statistical evidence, evaluated on precision, recall, and faithfulness.
 - Tech: PySpark, AWS (S3, Glue, Athena), Airflow, dbt, Python, LLM agents
@@ -64,7 +64,7 @@ Every number below comes from Uday's resume or his own project notes; do not add
 - Status: complete
 
 ## Stage 5 · Query — AI Cricket Intelligence Platform (Sep 2025)
-- Problem: Cricket predictions are more useful when they're accurate and explained.
+- Problem: Fans and analysts want cricket predictions they can trust and understand.
 - Built: LSTM and Transformer models predicting IPL player runs, wickets, and win probability; a RAG pipeline over player, team, venue, and match data; and LLM-generated explanations in a Streamlit dashboard.
 - Tech: Python, PyTorch, Transformers, RAG, PostgreSQL, FastAPI, Streamlit
 - Highlight: Transformer reached 15.7 runs MAE vs. 18.4 for LSTM

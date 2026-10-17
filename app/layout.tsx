@@ -18,9 +18,9 @@ const body = VT323({
 });
 
 export const metadata: Metadata = {
-  title: "Udayverse",
+  title: "Uday Patel | Udayverse",
   description:
-    "Uday's portfolio: a retro pixel-game data pipeline from messy data to something useful.",
+    "Engineer by training, product thinker by habit. I build systems that people actually use.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

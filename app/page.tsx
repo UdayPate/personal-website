@@ -4,7 +4,7 @@ import Station from "@/components/Station";
 
 export default function Home() {
   return (
-    <main id="top" className="mx-auto w-full max-w-3xl flex-1 px-4 pb-16">
+    <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-16">
       <section className="py-16 text-center sm:py-24">
         <h1 className="font-pixel text-2xl leading-relaxed text-orange sm:text-4xl">
           {site.name.toUpperCase()}
