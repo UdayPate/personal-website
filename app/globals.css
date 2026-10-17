@@ -44,3 +44,34 @@ body {
     repeating-linear-gradient(90deg, transparent 0 22px, rgba(255, 140, 0, 0.35) 22px 26px),
     linear-gradient(#1a1a22, #111118);
 }
+
+/* Idle animation for the placeholder character, on only while it stands at a
+   station (class toggled by Pipeline.tsx). Stepped timing keeps it pixel-y. */
+.char-idle .char-body {
+  animation: char-bounce 0.7s steps(2, end) infinite;
+}
+.char-idle .char-eye {
+  animation: char-blink 2.4s steps(1, end) infinite;
+}
+@keyframes char-bounce {
+  50% {
+    transform: translateY(-6px);
+  }
+}
+@keyframes char-blink {
+  0%,
+  88%,
+  100% {
+    opacity: 1;
+  }
+  92%,
+  96% {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .char-idle .char-body,
+  .char-idle .char-eye {
+    animation: none;
+  }
+}

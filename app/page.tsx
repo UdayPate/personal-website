@@ -3,6 +3,7 @@ import { pipeline, site } from "@/content/site";
 import Station from "@/components/Station";
 import Pipeline from "@/components/Pipeline";
 import ScrollProgress from "@/components/ScrollProgress";
+import ScrollMemory from "@/components/ScrollMemory";
 
 export default function Home() {
   return (
@@ -37,6 +38,7 @@ export default function Home() {
           <Station key={item.slug} item={item} />
         ))}
       </Pipeline>
+      <ScrollMemory />
 
       <section id="about" className="mx-auto max-w-3xl scroll-mt-28 px-4 py-10">
         <p className="font-pixel text-[10px] text-green">LOAD COMPLETE</p>

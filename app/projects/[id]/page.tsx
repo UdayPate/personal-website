@@ -28,9 +28,16 @@ export default async function ProjectPage({ params }: PageProps<"/projects/[id]"
 
   return (
     <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-10">
-      <Link href="/projects" className="font-pixel text-[10px] text-cyan underline">
-        &lt; ALL PROJECTS
-      </Link>
+      <div className="flex flex-wrap gap-x-6 gap-y-2">
+        {!project.projectsOnly && (
+          <Link href={`/#${project.slug}`} className="font-pixel text-[10px] text-cyan underline">
+            &lt; BACK TO STATION
+          </Link>
+        )}
+        <Link href="/projects" className="font-pixel text-[10px] text-cyan underline">
+          ALL PROJECTS
+        </Link>
+      </div>
       <h1 className="mt-6 font-pixel text-lg leading-relaxed text-orange sm:text-xl">{title}</h1>
       {dates && <p className="text-foreground/60">{dates}</p>}
       {problem && <p className="mt-4 text-foreground">{problem}</p>}
