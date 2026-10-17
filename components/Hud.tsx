@@ -1,18 +1,26 @@
 import { site } from "@/content/site";
 import HudLive from "./HudLive";
 import HudName from "./HudName";
+import PixelIcon from "./PixelIcon";
+import type { hudIcons } from "@/art/icons";
 
 // Below 1024px the buttons become a fixed bottom bar (thumb reach, 44px targets,
 // iPhone safe area respected); from 1024px up everything sits in the top bar.
 const btn =
   "flex min-h-11 flex-1 items-center justify-center border-2 border-cyan px-2 font-pixel text-xs text-cyan hover:bg-cyan hover:text-background lg:min-h-8 lg:pointer-coarse:min-h-11 lg:flex-none lg:px-3";
 
-// Short labels on phones so five buttons fit at 360px; full labels from 640px.
-// The aria-label on each link contains the visible text plus the full meaning.
-function Label({ short, full }: { short: string; full: string }) {
-  // One element whose text comes from CSS (see .hud-label in globals.css), so
-  // there is never a hidden duplicate label in the DOM.
-  return <span aria-hidden className="hud-label" data-short={short} data-full={full} />;
+// Phones show a small pixel icon so five buttons fit at 360px; from 640px the
+// full word is shown (text comes from CSS, see .hud-label). The aria-label on
+// each link carries the full meaning for screen readers.
+function Label({ icon, full }: { icon: keyof typeof hudIcons; full: string }) {
+  return (
+    <>
+      <span aria-hidden className="sm:hidden">
+        <PixelIcon name={icon} />
+      </span>
+      <span aria-hidden className="hud-label hidden sm:inline" data-full={full} />
+    </>
+  );
 }
 
 export default function Hud() {
@@ -35,7 +43,7 @@ export default function Hud() {
             rel="noopener noreferrer"
             aria-label="Resume (CV PDF, opens in a new tab)"
           >
-            <Label short="CV" full="RESUME" />
+            <Label icon="resume" full="RESUME" />
           </a>
           <a
             className={btn}
@@ -44,7 +52,7 @@ export default function Hud() {
             rel="noopener noreferrer"
             aria-label="GitHub profile (opens in a new tab)"
           >
-            <Label short="GIT" full="GITHUB" />
+            <Label icon="github" full="GITHUB" />
           </a>
           <a
             className={btn}
@@ -53,10 +61,10 @@ export default function Hud() {
             rel="noopener noreferrer"
             aria-label="LinkedIn profile (opens in a new tab)"
           >
-            <Label short="IN" full="LINKEDIN" />
+            <Label icon="linkedin" full="LINKEDIN" />
           </a>
           <a className={btn} href="#contact" aria-label="Jump to contact details (email)">
-            <Label short="MAIL" full="CONTACT" />
+            <Label icon="contact" full="CONTACT" />
           </a>
           <button
             type="button"
@@ -65,7 +73,12 @@ export default function Hud() {
             title="Terminal arrives in a later phase"
             className="flex min-h-11 flex-1 items-center justify-center border-2 border-foreground/50 px-2 font-pixel text-xs text-foreground/60 lg:min-h-8 lg:pointer-coarse:min-h-11 lg:flex-none lg:px-3"
           >
-            <span aria-hidden>&gt;_</span>
+            <span aria-hidden className="sm:hidden">
+              <PixelIcon name="terminal" />
+            </span>
+            <span aria-hidden className="hidden sm:inline">
+              &gt;_
+            </span>
           </button>
         </nav>
       </div>

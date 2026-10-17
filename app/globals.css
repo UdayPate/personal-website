@@ -46,49 +46,116 @@ body {
     linear-gradient(#1a1a22, #111118);
 }
 
-/* Idle animation for the placeholder character, on only while it stands at a
-   station (class toggled by Pipeline.tsx). Stepped timing keeps it pixel-y. */
-.char-idle .char-body {
-  animation: char-bounce 0.7s steps(2, end) infinite;
-}
-.char-idle .char-eye {
-  animation: char-blink 2.4s steps(1, end) infinite;
-}
-@keyframes char-bounce {
-  50% {
-    transform: translateY(-6px);
-  }
-}
-@keyframes char-blink {
-  0%,
-  88%,
-  100% {
-    opacity: 1;
-  }
-  92%,
-  96% {
-    opacity: 0;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .char-idle .char-body,
-  .char-idle .char-eye {
-    animation: none;
-  }
-}
-
 /* Keyboard focus: a chunky off-white outline reads against every accent color. */
 :focus-visible {
   outline: 3px solid var(--foreground);
   outline-offset: 3px;
 }
 
-/* HUD button text: short on phones, full from 640px (see Hud.tsx). */
+/* HUD button text on wider screens (see Hud.tsx). */
 .hud-label::before {
-  content: attr(data-short);
+  content: attr(data-full);
 }
-@media (min-width: 640px) {
-  .hud-label::before {
-    content: attr(data-full);
+
+/* ---------- character sprite (public/sprites/stage-N.png) ----------
+   Each sheet is 4 columns x 3 rows of 32x40 frames: row 0 walk, row 1 idle,
+   row 2 celebrate. Frames advance with steps(); the scale --s is an integer so
+   pixels stay crisp (2x, or 3x on tall screens). Pipeline.tsx sets the
+   data-stage / data-anim / data-moving attributes below. */
+.char {
+  --s: 2;
+  width: calc(32px * var(--s));
+  height: calc(40px * var(--s));
+  pointer-events: none;
+}
+@media (min-height: 760px) and (min-width: 1200px) {
+  .char,
+  .laptop-prop {
+    --s: 3;
   }
+}
+.sprite {
+  width: 100%;
+  height: 100%;
+  background-image: url(/sprites/stage-1.png);
+  background-repeat: no-repeat;
+  background-size: calc(128px * var(--s)) calc(120px * var(--s));
+  background-position: 0 calc(var(--row, 1) * -40px * var(--s));
+  image-rendering: pixelated;
+  animation: sprite-frames var(--dur, 1.2s) steps(4) infinite;
+}
+@keyframes sprite-frames {
+  to {
+    background-position-x: calc(-128px * var(--s));
+  }
+}
+.char[data-stage="2"] .sprite { background-image: url(/sprites/stage-2.png); }
+.char[data-stage="3"] .sprite { background-image: url(/sprites/stage-3.png); }
+.char[data-stage="4"] .sprite { background-image: url(/sprites/stage-4.png); }
+.char[data-anim="walk"] { --row: 0; --dur: 0.45s; }
+.char[data-anim="idle"] { --row: 1; --dur: 1.2s; }
+.char[data-anim="celebrate"] { --row: 2; --dur: 0.5s; }
+/* walking only while the page is actually scrolling */
+.char[data-anim="walk"][data-moving="0"] .sprite { animation-play-state: paused; }
+
+/* quick glitch flicker when the character evolves into the next stage */
+.char-glitch { animation: char-glitch 0.35s steps(1) 1; }
+@keyframes char-glitch {
+  0% { translate: -6px 0; filter: brightness(2.2); }
+  25% { translate: 5px -3px; filter: invert(1); }
+  50% { translate: -3px 2px; filter: brightness(1.8); }
+  75% { translate: 3px 0; filter: hue-rotate(90deg); }
+  100% { translate: 0 0; filter: none; }
+}
+
+/* small confetti burst at Serve */
+.char-confetti i {
+  position: absolute;
+  left: 50%;
+  top: 20%;
+  width: 6px;
+  height: 6px;
+  opacity: 0;
+}
+.char[data-confetti="1"] .char-confetti i {
+  animation: confetti 1.3s ease-out both;
+}
+@keyframes confetti {
+  0% { opacity: 1; transform: translate(0, 0); }
+  100% { opacity: 0; transform: translate(var(--dx), var(--dy)); }
+}
+
+/* closed laptop waiting on the belt at Serve (public/sprites/laptop.png, 18x6) */
+.laptop-prop {
+  --s: 2;
+  width: calc(18px * var(--s));
+  height: calc(6px * var(--s));
+  background: url(/sprites/laptop.png) no-repeat 0 0 / 100% 100%;
+  image-rendering: pixelated;
+}
+
+/* final portrait for phones, reduced motion and no-JS: stage 4, first idle frame */
+.sprite-static {
+  --s: 4;
+  width: calc(32px * var(--s));
+  height: calc(40px * var(--s));
+  background: url(/sprites/stage-4.png) no-repeat 0 calc(-40px * var(--s)) / calc(128px * var(--s)) calc(120px * var(--s));
+  image-rendering: pixelated;
+}
+
+/* intro: source icons + flying fragments (components/IntroArt.tsx) */
+.intro-icon {
+  --s: 4;
+  width: calc(16px * var(--s));
+  height: calc(16px * var(--s));
+  background: url(/sprites/sources.png) no-repeat calc(var(--i) * -16px * var(--s)) 0 / calc(48px * var(--s)) calc(16px * var(--s));
+  image-rendering: pixelated;
+}
+.frag {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 6px;
+  height: 6px;
+  opacity: 0;
 }

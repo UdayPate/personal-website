@@ -3,6 +3,7 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { PIPE_QUERY } from "./pipeQuery";
 
 /**
  * TUNING: every number that controls how the desktop pipeline *feels*.
@@ -39,20 +40,23 @@ const TUNING = {
   restingOffsetY: 40, // px lower than its popped-up position
   restingScale: 0.97,
 
+  /** How long the Serve celebration (and confetti) lasts before settling to idle. */
+  celebrateMs: 1600,
+
   /** Where the character stands on screen (fraction of screen width). */
   stopAt: 0.5, // at a station, under the card
   trailAt: 0.15, // trailing behind while the track slides
 } as const;
 
-// Same condition as the `pipe:` variant in globals.css. CSS lays the panels out
-// side by side; this only adds the pinning and motion on top.
-const PIPE_QUERY =
-  "(min-width: 1024px) and (min-height: 600px) and (prefers-reduced-motion: no-preference)";
-
 const REST = { y: TUNING.restingOffsetY, opacity: TUNING.restingOpacity, scale: TUNING.restingScale };
 const POPPED = { y: 0, opacity: 1, scale: 1 };
 const FLAG_DIM = { y: 44, backgroundColor: "#3a3a45" };
 const FLAG_LIT = { y: 0, backgroundColor: "#00ff41" };
+const SHEETS = [1, 2, 3, 4].map((n) => `/sprites/stage-${n}.png`);
+// 10 confetti bits fly out in different directions (CSS does the motion)
+const CONFETTI = ["#ff8c00", "#00bfff", "#00ff41", "#f0f0f0", "#ff8c00", "#00bfff", "#00ff41", "#f0f0f0", "#ff8c00", "#00bfff"].map(
+  (color, i) => ({ color, dx: Math.round(Math.cos((i / 10) * Math.PI * 2 - 1.2) * 70), dy: Math.round(Math.sin((i / 10) * Math.PI * 2 - 1.2) * 60) - 20 }),
+);
 
 export default function Pipeline({ children }: { children: ReactNode }) {
   const sectionRef = useRef<HTMLElement>(null);
@@ -125,6 +129,16 @@ export default function Pipeline({ children }: { children: ReactNode }) {
         if (card) {
           tl.fromTo(card, REST, { ...POPPED, duration: T.popDuration, ease: "power2.out", ...no }, arriveAt(i));
         }
+        const prop = panels[i].querySelector<HTMLElement>("[data-laptop]");
+        if (prop) {
+          // the laptop jumps into the character's hands as it arrives (and evolves)
+          tl.fromTo(
+            prop,
+            { opacity: 1, x: 0, y: 0, scale: 1 },
+            { opacity: 0, x: () => -W() * 0.05, y: -50, scale: 0.5, duration: T.popDuration, ease: "power2.in", ...no },
+            arriveAt(i),
+          );
+        }
         const flag = flags[i];
         if (flag) {
           tl.fromTo(flag, FLAG_DIM, { ...FLAG_LIT, duration: T.popDuration, ease: "power2.out", ...no }, arriveAt(i));
@@ -152,15 +166,67 @@ export default function Pipeline({ children }: { children: ReactNode }) {
       // Make sure the timeline lasts through the final dwell.
       tl.set({}, {}, total);
 
-      // Idle animation (CSS) runs only while the character stands at a station.
-      let idle = false;
+      // --- Character state machine, driven by the timeline's current time ---
+      // Stage swaps at each station's arrival; walk while travelling (only while
+      // the page is scrolling), idle while stopped, celebrate once at Serve.
+      let artStage = 1;
+      const artStages = panels.map((p) => {
+        const v = Number(p.dataset.artStage);
+        if (v) artStage = v; // checkpoints keep the stage they arrived with
+        return artStage;
+      });
+      const celebrateIdx = panels.findIndex((p) => p.dataset.artStage === "4");
+      const stageAt = (t: number) => {
+        let st = artStages[0];
+        for (let i = 0; i < n; i++) if (t >= arriveAt(i)) st = artStages[i];
+        return st;
+      };
+      let curStage = 1;
+      let windowIdx = -1;
+      let moveTimer: ReturnType<typeof setTimeout> | undefined;
+      let celebrateTimer: ReturnType<typeof setTimeout> | undefined;
+      const setAnim = (a: string) => (char.dataset.anim = a);
+      const glitch = () => {
+        char.classList.remove("char-glitch");
+        void char.offsetWidth; // restart the CSS animation
+        char.classList.add("char-glitch");
+      };
+      const onAnimEnd = (e: AnimationEvent) => {
+        if (e.animationName === "char-glitch") char.classList.remove("char-glitch");
+      };
+      char.addEventListener("animationend", onAnimEnd);
+      SHEETS.forEach((src) => (new Image().src = src)); // avoid a blank frame on the first swap
+
       tl.eventCallback("onUpdate", () => {
         const t = tl.time();
-        let at = false;
-        for (let i = 0; i < n; i++) if (t >= arriveAt(i) && t <= leaveAt(i)) at = true;
-        if (at !== idle) {
-          idle = at;
-          char.classList.toggle("char-idle", at);
+        char.dataset.moving = "1";
+        clearTimeout(moveTimer);
+        moveTimer = setTimeout(() => (char.dataset.moving = "0"), 140);
+
+        const st = stageAt(t);
+        if (st !== curStage) {
+          curStage = st;
+          char.dataset.stage = String(st);
+          glitch();
+        }
+
+        let idx = -1;
+        for (let i = 0; i < n; i++) if (t >= arriveAt(i) && t <= leaveAt(i)) idx = i;
+        if (idx !== windowIdx) {
+          windowIdx = idx;
+          clearTimeout(celebrateTimer);
+          char.dataset.confetti = "0";
+          if (idx < 0) setAnim("walk");
+          else if (idx === celebrateIdx) {
+            setAnim("celebrate");
+            char.dataset.confetti = "1";
+            celebrateTimer = setTimeout(() => {
+              if (windowIdx === celebrateIdx) {
+                setAnim("idle");
+                char.dataset.confetti = "0";
+              }
+            }, T.celebrateMs);
+          } else setAnim("idle");
         }
       });
 
@@ -212,7 +278,14 @@ export default function Pipeline({ children }: { children: ReactNode }) {
         track.removeEventListener("focusin", onFocus);
         section.removeEventListener("scroll", onSectionScroll);
         ScrollTrigger.removeEventListener("refreshInit", setHudVar);
-        char.classList.remove("char-idle");
+        char.removeEventListener("animationend", onAnimEnd);
+        clearTimeout(moveTimer);
+        clearTimeout(celebrateTimer);
+        char.classList.remove("char-glitch");
+        char.dataset.stage = "1";
+        char.dataset.anim = "walk";
+        char.dataset.moving = "0";
+        char.dataset.confetti = "0";
         section.style.overflow = "";
       };
     });
@@ -231,17 +304,23 @@ export default function Pipeline({ children }: { children: ReactNode }) {
         {children}
         {/* Conveyor belt the stations sit on (desktop only) */}
         <div aria-hidden className="belt hidden pipe:block" />
-        {/* Placeholder character: a plain square until the real sprites (Phase 6).
-            The outer box is moved by GSAP; the inner box does the idle bounce. */}
+        {/* The character: a sprite sheet per stage (see art/ and public/sprites).
+            The outer box is moved by GSAP; CSS animates the frames. */}
         <div
           ref={charRef}
           aria-hidden
-          className="absolute bottom-[4.5rem] left-0 hidden h-10 w-10 pipe:block"
+          data-stage="1"
+          data-anim="walk"
+          data-moving="0"
+          data-confetti="0"
+          className="char absolute bottom-[3.75rem] left-0 hidden pipe:block"
         >
-          <div className="char-body relative h-full w-full border-4 border-background bg-orange">
-            <span className="char-eye absolute left-1 top-2 h-2 w-2 bg-background" />
-            <span className="char-eye absolute right-1 top-2 h-2 w-2 bg-background" />
-          </div>
+          <div className="sprite" />
+          <span className="char-confetti">
+            {CONFETTI.map((c, i) => (
+              <i key={i} style={{ background: c.color, ["--dx" as string]: `${c.dx}px`, ["--dy" as string]: `${c.dy}px` }} />
+            ))}
+          </span>
         </div>
       </div>
     </section>

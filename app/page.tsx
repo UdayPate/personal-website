@@ -2,6 +2,7 @@ import Link from "next/link";
 import { pipeline, site } from "@/content/site";
 import Station from "@/components/Station";
 import Pipeline from "@/components/Pipeline";
+import IntroArt from "@/components/IntroArt";
 import ScrollProgress from "@/components/ScrollProgress";
 import ScrollMemory from "@/components/ScrollMemory";
 
@@ -9,7 +10,7 @@ export default function Home() {
   return (
     <main className="w-full flex-1 pb-16">
       <ScrollProgress />
-      <section className="px-4 py-16 text-center sm:py-24">
+      <section className="px-4 py-12 text-center sm:py-16 pipe:flex pipe:min-h-[calc(100svh-var(--hud-h))] pipe:flex-col pipe:justify-center pipe:py-6">
         <h1 className="font-pixel text-2xl leading-relaxed text-orange sm:text-4xl">
           {site.name.toUpperCase()}
         </h1>
@@ -31,6 +32,7 @@ export default function Home() {
             ALL PROJECTS
           </Link>
         </div>
+        <IntroArt />
       </section>
 
       <Pipeline>
