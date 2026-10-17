@@ -7,11 +7,14 @@ export default function ProjectCard({
   project,
   eyebrow,
   compact = false,
+  headingLevel = 3,
 }: {
   project: Project;
   eyebrow?: string;
   compact?: boolean;
+  headingLevel?: 2 | 3;
 }) {
+  const Heading = headingLevel === 2 ? "h2" : "h3";
   const { slug, title, dates, problem, summary, tech, highlight } = project;
   return (
     <article
@@ -19,15 +22,15 @@ export default function ProjectCard({
         compact ? "pipe:w-full pipe:max-w-5xl pipe:p-5" : ""
       }`}
     >
-      {eyebrow && <p className="font-pixel text-[10px] text-green">{eyebrow}</p>}
-      <h3
+      {eyebrow && <p className="font-pixel text-xs text-green">{eyebrow}</p>}
+      <Heading
         className={`mt-2 font-pixel text-sm leading-relaxed text-orange sm:text-base ${
           compact ? "pipe:text-sm" : ""
         }`}
       >
         {title}
-      </h3>
-      {dates && <p className="text-foreground/60">{dates}</p>}
+      </Heading>
+      {dates && <p className="text-foreground/80">{dates}</p>}
       <div className={compact ? "pipe:mt-2 pipe:grid pipe:grid-cols-[3fr_2fr] pipe:gap-x-8" : ""}>
         <div className={compact ? "pipe:text-[1.3rem] pipe:leading-[1.15]" : ""}>
           {problem && <p className="mt-3 text-foreground">{problem}</p>}
@@ -51,7 +54,7 @@ export default function ProjectCard({
           <Link
             href={`/projects/${slug}`}
             aria-label={`View details: ${title}`}
-            className="mt-5 inline-block border-2 border-orange px-3 py-1 font-pixel text-[10px] text-orange hover:bg-orange hover:text-background"
+            className="mt-5 inline-flex min-h-11 items-center border-2 border-orange px-3 font-pixel text-xs lg:min-h-9 lg:pointer-coarse:min-h-11 text-orange hover:bg-orange hover:text-background"
           >
             VIEW DETAILS
           </Link>

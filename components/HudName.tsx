@@ -9,7 +9,8 @@ export default function HudName({ name }: { name: string }) {
   return (
     <Link
       href="/"
-      className="font-pixel text-xs text-orange"
+      aria-label={`${name}, home`}
+      className="inline-flex min-h-8 items-center font-pixel text-xs text-orange"
       onClick={(e) => {
         if (pathname === "/") {
           e.preventDefault();

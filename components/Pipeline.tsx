@@ -181,6 +181,8 @@ export default function Pipeline({ children }: { children: ReactNode }) {
         if (!panel) return;
         e.preventDefault();
         goTo(panel);
+        // Keyboard users (e.g. the skip link) continue from inside that station.
+        panel.querySelector<HTMLElement>("a")?.focus({ preventScroll: true });
       };
       const onFocus = (e: FocusEvent) => {
         const panel = (e.target as HTMLElement).closest<HTMLElement>("[data-station]");

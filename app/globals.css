@@ -23,6 +23,7 @@ body {
   color: var(--foreground);
   font-family: var(--font-body), monospace;
   font-size: 1.5rem;
+  line-height: 1.3;
 }
 
 /* Desktop pipeline layout: panels side by side. Applied by CSS alone so the
@@ -73,5 +74,21 @@ body {
   .char-idle .char-body,
   .char-idle .char-eye {
     animation: none;
+  }
+}
+
+/* Keyboard focus: a chunky off-white outline reads against every accent color. */
+:focus-visible {
+  outline: 3px solid var(--foreground);
+  outline-offset: 3px;
+}
+
+/* HUD button text: short on phones, full from 640px (see Hud.tsx). */
+.hud-label::before {
+  content: attr(data-short);
+}
+@media (min-width: 640px) {
+  .hud-label::before {
+    content: attr(data-full);
   }
 }

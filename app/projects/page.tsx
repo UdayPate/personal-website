@@ -13,14 +13,14 @@ export const metadata: Metadata = {
 export default function ProjectsPage() {
   return (
     <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-10">
-      <Link href="/" className="font-pixel text-[10px] text-cyan underline">
+      <Link href="/" className="inline-flex min-h-11 items-center font-pixel text-xs text-cyan underline">
         &lt; BACK TO PIPELINE
       </Link>
       <h1 className="mt-6 font-pixel text-xl text-orange">PROJECTS</h1>
       <p className="mt-2 text-foreground/70">Everything in one plain list.</p>
 
       <h2 className="mt-10 font-pixel text-sm text-green">PROJECTS</h2>
-      <div className="mt-4 space-y-8">
+      <div id="projects-list" className="mt-4 scroll-mt-24 space-y-8">
         {projects.map((p) => (
           <ProjectCard key={p.slug} project={p} />
         ))}

@@ -18,8 +18,8 @@ export default function Station({ item }: { item: PipelineItem }) {
       data-station={hudLabel}
       className="mx-auto w-full max-w-3xl scroll-mt-28 border-l-8 border-orange/60 py-8 pl-4 pr-4 sm:pl-8 pipe:relative pipe:flex pipe:h-full pipe:w-screen pipe:shrink-0 pipe:items-center pipe:justify-center pipe:mx-0 pipe:max-w-none pipe:border-l-0 pipe:px-[6vw] pipe:pb-24 pipe:pt-4"
     >
-      {project && <ProjectCard project={project} eyebrow={eyebrow} compact />}
-      {checkpoint && <CheckpointCard checkpoint={checkpoint} compact />}
+      {project && <ProjectCard project={project} eyebrow={eyebrow} compact headingLevel={2} />}
+      {checkpoint && <CheckpointCard checkpoint={checkpoint} compact headingLevel={2} />}
       {checkpoint && (
         // Checkpoint marker on the belt: Pipeline.tsx raises and lights the flag
         // as the character passes. Shown lit by default (no JS / static layouts hide it).

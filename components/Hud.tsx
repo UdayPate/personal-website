@@ -2,35 +2,70 @@ import { site } from "@/content/site";
 import HudLive from "./HudLive";
 import HudName from "./HudName";
 
+// Below 1024px the buttons become a fixed bottom bar (thumb reach, 44px targets,
+// iPhone safe area respected); from 1024px up everything sits in the top bar.
 const btn =
-  "border-2 border-cyan px-2 py-1 font-pixel text-[10px] text-cyan hover:bg-cyan hover:text-background focus-visible:outline-2 focus-visible:outline-orange";
+  "flex min-h-11 flex-1 items-center justify-center border-2 border-cyan px-2 font-pixel text-xs text-cyan hover:bg-cyan hover:text-background lg:min-h-8 lg:pointer-coarse:min-h-11 lg:flex-none lg:px-3";
+
+// Short labels on phones so five buttons fit at 360px; full labels from 640px.
+// The aria-label on each link contains the visible text plus the full meaning.
+function Label({ short, full }: { short: string; full: string }) {
+  // One element whose text comes from CSS (see .hud-label in globals.css), so
+  // there is never a hidden duplicate label in the DOM.
+  return <span aria-hidden className="hud-label" data-short={short} data-full={full} />;
+}
 
 export default function Hud() {
   return (
-    <header data-hud className="sticky top-0 z-50 border-b-4 border-orange bg-background/95 px-3 py-2">
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-4 gap-y-2">
+    <header
+      data-hud
+      className="sticky top-0 z-50 border-b-4 border-orange bg-background px-[max(0.75rem,env(safe-area-inset-left))] py-2"
+    >
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-4 gap-y-1">
         <HudName name={site.name} />
         <HudLive />
-        <nav aria-label="Quick links" className="flex flex-wrap gap-2">
-          <a className={btn} href={site.resume} target="_blank" rel="noopener noreferrer">
-            RESUME
+        <nav
+          aria-label="Quick links"
+          className="fixed inset-x-0 bottom-0 z-50 flex gap-2 border-t-4 border-orange bg-background px-[max(0.5rem,env(safe-area-inset-left))] pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 lg:static lg:inset-auto lg:border-0 lg:bg-transparent lg:p-0"
+        >
+          <a
+            className={btn}
+            href={site.resume}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Resume (CV PDF, opens in a new tab)"
+          >
+            <Label short="CV" full="RESUME" />
           </a>
-          <a className={btn} href={site.links.github} target="_blank" rel="noopener noreferrer">
-            GITHUB
+          <a
+            className={btn}
+            href={site.links.github}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="GitHub profile (opens in a new tab)"
+          >
+            <Label short="GIT" full="GITHUB" />
           </a>
-          <a className={btn} href={site.links.linkedin} target="_blank" rel="noopener noreferrer">
-            LINKEDIN
+          <a
+            className={btn}
+            href={site.links.linkedin}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="LinkedIn profile (opens in a new tab)"
+          >
+            <Label short="IN" full="LINKEDIN" />
           </a>
-          <a className={btn} href="#contact">
-            CONTACT
+          <a className={btn} href="#contact" aria-label="Jump to contact details (email)">
+            <Label short="MAIL" full="CONTACT" />
           </a>
           <button
             type="button"
             disabled
+            aria-label="&gt;_ Terminal (coming soon)"
             title="Terminal arrives in a later phase"
-            className="border-2 border-foreground/30 px-2 py-1 font-pixel text-[10px] text-foreground/30"
+            className="flex min-h-11 flex-1 items-center justify-center border-2 border-foreground/50 px-2 font-pixel text-xs text-foreground/60 lg:min-h-8 lg:pointer-coarse:min-h-11 lg:flex-none lg:px-3"
           >
-            &gt;_
+            <span aria-hidden>&gt;_</span>
           </button>
         </nav>
       </div>

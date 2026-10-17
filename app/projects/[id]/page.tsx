@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { getProject, projects } from "@/content/projects";
 
 const linkBtn =
-  "border-2 border-orange px-3 py-1 font-pixel text-[10px] text-orange hover:bg-orange hover:text-background";
+  "inline-flex min-h-11 items-center border-2 border-orange px-3 font-pixel text-xs text-orange hover:bg-orange hover:text-background";
 
 export function generateStaticParams() {
   return projects.map((p) => ({ id: p.slug }));
@@ -27,19 +27,19 @@ export default async function ProjectPage({ params }: PageProps<"/projects/[id]"
   const { title, dates, problem, details, tech, highlight, links } = project;
 
   return (
-    <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-10">
+    <main id="content" className="mx-auto w-full max-w-3xl flex-1 px-4 py-10">
       <div className="flex flex-wrap gap-x-6 gap-y-2">
         {!project.projectsOnly && (
-          <Link href={`/#${project.slug}`} className="font-pixel text-[10px] text-cyan underline">
+          <Link href={`/#${project.slug}`} className="inline-flex min-h-11 items-center font-pixel text-xs text-cyan underline">
             &lt; BACK TO STATION
           </Link>
         )}
-        <Link href="/projects" className="font-pixel text-[10px] text-cyan underline">
+        <Link href="/projects" className="inline-flex min-h-11 items-center font-pixel text-xs text-cyan underline">
           ALL PROJECTS
         </Link>
       </div>
       <h1 className="mt-6 font-pixel text-lg leading-relaxed text-orange sm:text-xl">{title}</h1>
-      {dates && <p className="text-foreground/60">{dates}</p>}
+      {dates && <p className="text-foreground/80">{dates}</p>}
       {problem && <p className="mt-4 text-foreground">{problem}</p>}
       <p className="mt-4 text-foreground/80">{details}</p>
 
