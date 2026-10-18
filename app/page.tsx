@@ -5,6 +5,15 @@ import Pipeline from "@/components/Pipeline";
 import IntroArt from "@/components/IntroArt";
 import ScrollProgress from "@/components/ScrollProgress";
 import ScrollMemory from "@/components/ScrollMemory";
+import AboutSprite from "@/components/AboutSprite";
+import PixelIcon from "@/components/PixelIcon";
+
+const contactLinks = [
+  { label: "EMAIL", icon: "contact", href: `mailto:${site.links.email}`, aria: `Email ${site.links.email}`, external: false },
+  { label: "LINKEDIN", icon: "linkedin", href: site.links.linkedin, aria: "LinkedIn profile (opens in a new tab)", external: true },
+  { label: "GITHUB", icon: "github", href: site.links.github, aria: "GitHub profile (opens in a new tab)", external: true },
+  { label: "RESUME", icon: "resume", href: site.resume, aria: "Resume (PDF, opens in a new tab)", external: true },
+] as const;
 
 export default function Home() {
   return (
@@ -42,39 +51,47 @@ export default function Home() {
       </Pipeline>
       <ScrollMemory />
 
-      <section id="about" className="mx-auto max-w-3xl scroll-mt-28 px-4 py-10">
-        <p className="font-pixel text-xs text-green">LOAD COMPLETE</p>
-        <h2 className="mt-2 font-pixel text-base text-orange">ABOUT</h2>
-        <p className="mt-4 text-foreground/90">{site.about}</p>
+      <section id="about" className="mx-auto max-w-5xl scroll-mt-28 px-4 py-10">
+        <div className="grid items-center gap-8 lg:grid-cols-[3fr_2fr] lg:gap-12">
+          <div>
+            <p className="font-pixel text-xs text-green">LOAD COMPLETE</p>
+            <h2 className="mt-2 font-pixel text-base text-orange">ABOUT</h2>
+            <p className="mt-4 text-foreground/90">{site.about}</p>
+          </div>
+          <div className="mx-auto w-full max-w-sm border-4 border-green bg-background p-4 shadow-[6px_6px_0_0_var(--green)]">
+            <p className="font-pixel text-xs text-green">READY FOR QUERIES</p>
+            <div className="mt-4 flex justify-center">
+              <AboutSprite />
+            </div>
+            <div aria-hidden className="belt !static !h-4 !border-t-4" />
+          </div>
+        </div>
       </section>
 
-      <section id="contact" className="mx-auto max-w-3xl scroll-mt-28 px-4 py-6">
-        <h2 className="font-pixel text-base text-orange">CONTACT</h2>
-        <ul className="mt-4 space-y-2">
-          <li>
-            Email:{" "}
-            <a className="inline-block py-1 text-cyan underline" href={`mailto:${site.links.email}`}>
-              {site.links.email}
-            </a>
-          </li>
-          <li>
-            LinkedIn:{" "}
-            <a className="inline-block py-1 text-cyan underline" href={site.links.linkedin} target="_blank" rel="noopener noreferrer">
-              upatelda
-            </a>
-          </li>
-          <li>
-            GitHub:{" "}
-            <a className="inline-block py-1 text-cyan underline" href={site.links.github} target="_blank" rel="noopener noreferrer">
-              UdayPate
-            </a>
-          </li>
-          <li>
-            <a className="inline-block py-1 text-cyan underline" href={site.resume} target="_blank" rel="noopener noreferrer">
-              Resume (PDF)
-            </a>
-          </li>
-        </ul>
+      <section id="contact" className="mx-auto max-w-5xl scroll-mt-28 px-4 py-6 pb-10">
+        <div className="grid items-center gap-6 border-t-4 border-orange/60 pt-8 lg:grid-cols-[3fr_2fr] lg:gap-12">
+          <div>
+            <h2 className="font-pixel text-base text-orange">CONTACT</h2>
+            <p className="mt-4 text-foreground/90">
+              The quickest way to reach me is email: <span className="text-cyan">{site.links.email}</span>
+            </p>
+          </div>
+          <ul className="grid grid-cols-2 gap-3">
+            {contactLinks.map((c) => (
+              <li key={c.label} className="flex">
+                <a
+                  className="flex min-h-11 flex-1 items-center justify-center gap-2 border-2 border-cyan px-3 py-2 font-pixel text-xs text-cyan shadow-[3px_3px_0_0_var(--cyan)] hover:bg-cyan hover:text-background"
+                  href={c.href}
+                  aria-label={c.aria}
+                  {...(c.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                >
+                  <PixelIcon name={c.icon} className="h-5 w-5" />
+                  {c.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
       </section>
     </main>
   );

@@ -29,7 +29,7 @@ export default function ScrollProgress() {
 
       let stage = "INTRO";
       if (active) stage = active.dataset.station ?? stage;
-      else if (pipeline && pipeline.getBoundingClientRect().bottom < cy) stage = "STAGE 5/5 · LOAD COMPLETE";
+      else if (pipeline && pipeline.getBoundingClientRect().bottom < cy) stage = "STAGE 5/5 · COMPLETE";
 
       hudStore.set({ stage, quality });
     };

@@ -40,3 +40,10 @@ export const pipeline: PipelineItem[] = [
   { kind: "stage", stage: 4, label: "Serve", slug: "data-lens" },
   { kind: "stage", stage: 5, label: "Query", slug: "cricket-intelligence" },
 ];
+
+/** The three personal icons in the hero (art/icons.ts `heroIcons`). `text` is both the tooltip and the aria-label. */
+export const heroIcons = [
+  { id: "grad", text: "BS Computer Science @ UC Santa Cruz → MS @ SJSU (Dec 2027)", color: "#4aa3ff" },
+  { id: "laptop", text: "Engineer by training, product thinker by habit: 6 projects, 2 internships", color: "#7fe9ff" },
+  { id: "cricket", text: "Off the clock: cricket. It even made it into a project.", color: "#e8c27a" },
+] as const;

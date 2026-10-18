@@ -149,13 +149,85 @@ body {
   }
 }
 
-/* intro: source icons + flying fragments (components/IntroArt.tsx) */
-.intro-icon {
+/* intro: personal icons + flying fragments (components/IntroArt.tsx).
+   public/sprites/hero.png is 4 icons of 16x16: grad cap, laptop (bulb off),
+   laptop (bulb on), cricket. */
+.hero-icon {
   --s: 4;
+  position: relative;
   width: calc(16px * var(--s));
   height: calc(16px * var(--s));
-  background: url(/sprites/sources.png) no-repeat calc(var(--i) * -16px * var(--s)) 0 / calc(48px * var(--s)) calc(16px * var(--s));
+  background: url(/sprites/hero.png) no-repeat calc(var(--i) * -16px * var(--s)) 0 / calc(64px * var(--s)) calc(16px * var(--s));
   image-rendering: pixelated;
+}
+/* the lit-bulb layer flickers on once after load and stays on */
+.bulb-on {
+  animation: bulb-flicker 1.4s steps(1) 0.6s backwards;
+}
+@keyframes bulb-flicker {
+  0% { opacity: 0; }
+  12% { opacity: 1; }
+  22% { opacity: 0; }
+  34% { opacity: 1; }
+  42% { opacity: 0; }
+  62% { opacity: 1; }
+  70% { opacity: 0; }
+  100% { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bulb-on { animation: none; }
+}
+
+/* station props on the belt (public/sprites/props.png: 5 props of 16x16) */
+.station-prop {
+  --s: 2;
+  width: calc(16px * var(--s));
+  height: calc(16px * var(--s));
+  background: url(/sprites/props.png) no-repeat calc(var(--i) * -16px * var(--s)) 0 / calc(80px * var(--s)) calc(16px * var(--s));
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+@media (min-height: 760px) and (min-width: 1200px) {
+  .station-prop {
+    --s: 3;
+  }
+}
+
+/* waving ending sprite (public/sprites/wave.png: 40x40 frames, row 0 wave, row 1 idle).
+   With no data-anim it is a still portrait (phones, reduced motion, no JS). */
+.wave {
+  --s: 3;
+  --row: 1;
+  width: calc(40px * var(--s));
+  height: calc(40px * var(--s));
+  background: url(/sprites/wave.png) no-repeat 0 calc(var(--row) * -40px * var(--s)) / calc(160px * var(--s)) calc(80px * var(--s));
+  image-rendering: pixelated;
+}
+@media (min-width: 1024px) {
+  .wave {
+    --s: 5;
+  }
+}
+.wave[data-anim="wave"] {
+  --row: 0;
+  animation: wave-wave 0.8s steps(4) 3;
+}
+.wave[data-anim="idle"] {
+  animation: wave-idle 1.2s steps(4) infinite;
+}
+/* two names with the same frames, so switching between wave and idle restarts the animation */
+@keyframes wave-wave {
+  to {
+    background-position-x: calc(-160px * var(--s));
+  }
+}
+@keyframes wave-idle {
+  to {
+    background-position-x: calc(-160px * var(--s));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wave { animation: none !important; }
 }
 .frag {
   position: absolute;
