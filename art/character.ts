@@ -123,3 +123,23 @@ export const TORSO8: Rows = [
   [4, "UUUUUUUUUU"],
 ];
 export const TORSO8_TOP = 12;
+
+/**
+ * Laptop tucked flat against the body for the waving pose: seen edge-on as a thin
+ * slab (4 wide x 11 tall) along the near side of the torso, mostly hidden by the
+ * near arm. Placed from canvas row 28, column 6.
+ */
+export const LAPTOP_TUCK: Rows = [
+  [6, "QDDq"],
+  [6, "QDDq"],
+  [6, "QDDq"],
+  [6, "QDYq"],
+  [6, "QDDq"],
+  [6, "QDDq"],
+  [6, "QDDq"],
+  [6, "QDDq"],
+  [6, "QDDq"],
+  [6, "QDDq"],
+  [6, "qqqq"],
+];
+export const LAPTOP_TUCK_TOP = 28;

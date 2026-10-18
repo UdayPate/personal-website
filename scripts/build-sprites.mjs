@@ -8,10 +8,11 @@
 // Stage 1 (glitch blob) is derived from stage 3 below; tweak toBlob() to change it.
 import { deflateSync } from "node:zlib";
 import { mkdirSync, writeFileSync } from "node:fs";
-import { hudIcons, sourceIcons } from "../art/icons.ts";
-import { PALETTE, HEAD, HEAD_TOP, TORSO, TORSO_TOP, LAPTOP, LAPTOP_TOP, HEAD8, HEAD8_TOP, TORSO8, TORSO8_TOP } from "../art/character.ts";
+import { hudIcons, sourceIcons, heroIcons } from "../art/icons.ts";
+import { props, propPalette } from "../art/props.ts";
+import { PALETTE, HEAD, HEAD_TOP, TORSO, TORSO_TOP, LAPTOP, LAPTOP_TOP, LAPTOP_TUCK, LAPTOP_TUCK_TOP, HEAD8, HEAD8_TOP, TORSO8, TORSO8_TOP } from "../art/character.ts";
 
-const W = 32;
+let W = 32;
 const H = 40;
 const OUT = new URL("../public/sprites/", import.meta.url);
 const PREVIEW = new URL("../art/preview/", import.meta.url);
@@ -88,7 +89,7 @@ function sleeve(cv, x, y0, y1, w, shadowOnly) {
   for (let r = y0; r <= y1; r++)
     for (let k = 0; k < w; k++) put(cv, x + k, r, shadowOnly || k === w - 1 ? "u" : "U");
 }
-function frame3({ legs = [0, 0], bob = 0, blink = false, nearArm = 0, farArm = 0, farRaised = false, laptop = false }) {
+function frame3({ legs = [0, 0], bob = 0, blink = false, nearArm = 0, farArm = 0, farRaised = false, wave = null, laptop = false, tuck = false }) {
   const cv = blank();
   leg(cv, 13, legs[0]);
   leg(cv, 17, legs[1]);
@@ -96,6 +97,18 @@ function frame3({ legs = [0, 0], bob = 0, blink = false, nearArm = 0, farArm = 0
     // celebration: far arm punches the air behind the head, near arm keeps hold of the laptop
     sleeve(cv, 28, 17 + bob, 27 + bob, 3, true);
     for (let r = 13; r <= 16; r++) for (let k = 0; k < 4; k++) put(cv, 28 + k, r + bob, k === 3 ? "s" : "S");
+  } else if (wave !== null) {
+    // wave (canvas is 40 wide): arm leaves the shoulder sideways, elbow up, forearm leans out and back (wave = -2..2)
+    for (let r = 26; r <= 28; r++) for (let k = 27; k <= 34; k++) put(cv, k, r + bob, r === 28 ? "u" : "U");
+    sleeve(cv, 32, 17 + bob, 25, 3, true);
+    for (let r = 6; r <= 16; r++) {
+      const t = Math.round((wave * (16 - r)) / 10);
+      for (let k = 0; k < 3; k++) put(cv, 32 + t + k, r + bob, k === 2 ? "u" : "U");
+    }
+    const c = 33 + wave; // hand centre: open palm, 3 fingers + thumb, well above head height
+    for (let r = 3; r <= 5; r++) for (let k = -2; k <= 2; k++) put(cv, c + k, r + bob, k === 2 ? "s" : "S");
+    put(cv, c + 3, 5 + bob, "S");
+    for (const k of [-2, 0, 2]) { put(cv, c + k, 1 + bob, "S"); put(cv, c + k, 2 + bob, "S"); }
   } else {
     // far arm sits behind the torso and peeks out when swung forward
     sleeve(cv, 24 + farArm, 26 + bob, 31 + bob, 4, true);
@@ -107,7 +120,8 @@ function frame3({ legs = [0, 0], bob = 0, blink = false, nearArm = 0, farArm = 0
   stamp(cv, TORSO, TORSO_TOP, bob);
   stamp(cv, HEAD, HEAD_TOP, bob, (c) => (blink && (c === "E" || c === "W") ? "s" : c));
   if (laptop) {
-    stamp(cv, LAPTOP, LAPTOP_TOP, bob);
+    if (tuck) stamp(cv, LAPTOP_TUCK, LAPTOP_TUCK_TOP, bob);
+    else stamp(cv, LAPTOP, LAPTOP_TOP, bob);
     sleeve(cv, 8, 26 + bob, 30 + bob, 4, false); // near arm clamps it against the hip
     for (let k = 0; k < 3; k++) put(cv, 8 + k, 31 + bob, k === 2 ? "s" : "S");
     for (let k = 0; k < 2; k++) put(cv, 8 + k, 32 + bob, "s");
@@ -132,7 +146,8 @@ const CELEBRATE = [
   { bob: -2, farRaised: true, legs: [-2, 2] },
   { bob: -1, farRaised: true, legs: [-1, 1] },
 ];
-const withHold = (list) => list.map((p) => ({ ...p, nearArm: 0, laptop: true }));
+const WAVE = [-3, 0, 3, 0].map((wave, i) => ({ wave, bob: i === 1 || i === 3 ? -1 : 0 }));
+const withHold = (list) => list.map((p) => ({ ...p, nearArm: 0, laptop: true, tuck: true }));
 
 // ---------- stage 2: hand-drawn at half resolution, then doubled ----------
 function frame2({ legs = [0, 0], bob = 0, blink = false, nearArm = 0, farArm = 0 }) {
@@ -231,7 +246,7 @@ const base = { walk: WALK.map(frame3), idle: IDLE.map(frame3), celebrate: CELEBR
 const holding = {
   walk: withHold(WALK).map(frame3),
   idle: withHold(IDLE).map(frame3),
-  celebrate: CELEBRATE.map((p) => frame3({ ...p, laptop: true })),
+  celebrate: CELEBRATE.map((p) => frame3({ ...p, laptop: true, tuck: true })),
 };
 
 const STAGES = [
@@ -349,7 +364,6 @@ function renderGrid(rows, palette, scale = 1, outlineColor = null) {
     for (let y = 0; y < img.h; y++) img.buf.copy(buf, (y * w + x0) * 4, y * img.w * 4, (y + 1) * img.w * 4);
     x0 += img.w;
   }
-  writeFileSync(new URL("sources.png", OUT), png(w, 16, buf));
 
   const laptop = renderGrid(LAPTOP.map(([, str]) => str), PALETTE, 1, "#8f98bd");
   writeFileSync(new URL("laptop.png", OUT), png(laptop.w, laptop.h, laptop.buf));
@@ -362,5 +376,43 @@ function renderGrid(rows, palette, scale = 1, outlineColor = null) {
   );
   items.push({ img: renderGrid(LAPTOP.map(([, str]) => str), PALETTE, 6, "#8f98bd"), x0: 20 + 4 * 90 + 120, y0: 20 });
   writeFileSync(new URL("preview-icons.png", PREVIEW), composite(items, 560, 240));
+}
+{ // wave sheet (About section): 40x40 frames, row 0 = wave, row 1 = idle with the tucked laptop
+  const oldW = W;
+  W = 40;
+  const wave = WAVE.map((p) => frame3({ ...p, nearArm: 0, laptop: true, tuck: true }));
+  const idle = IDLE.map((p) => frame3({ ...p, nearArm: 0, laptop: true, tuck: true }));
+  const { w, h, buf } = render([wave, idle], PALETTE, "#8f98bd");
+  W = oldW;
+  writeFileSync(new URL("wave.png", OUT), png(w, h, buf));
+  // station props: 5 across, 16x16 each (hopper, gears, database, dashboard, terminal)
+  const pr = Object.values(props).map((rows) => renderGrid(rows, propPalette));
+  const pb = Buffer.alloc(16 * pr.length * 16 * 4);
+  pr.forEach((img, i) => { for (let y = 0; y < 16; y++) img.buf.copy(pb, (y * 16 * pr.length + i * 16) * 4, y * 16 * 4, (y + 1) * 16 * 4); });
+  writeFileSync(new URL("props.png", OUT), png(16 * pr.length, 16, pb));
+  // hero icons: 4 across, 16x16 each (grad cap, laptop bulb off, laptop bulb on, cricket)
+  const hl = [heroIcons.gradCap, heroIcons.engineerOff, heroIcons.engineerOn, heroIcons.cricket].map((rows) => renderGrid(rows, heroIcons.palette));
+  const hb = Buffer.alloc(16 * hl.length * 16 * 4);
+  hl.forEach((img, i) => { for (let y = 0; y < 16; y++) img.buf.copy(hb, (y * 16 * hl.length + i * 16) * 4, y * 16 * 4, (y + 1) * 16 * 4); });
+  writeFileSync(new URL("hero.png", OUT), png(16 * hl.length, 16, hb));
+}
+{ // review image: 4 wave frames (laptop under arm), 5 station props, 3 hero icons (+ bulb on/off)
+  const items = [];
+  const pad = 20;
+  W = 40;
+  const waveFrames = WAVE.map((p) => frame3({ ...p, nearArm: 0, laptop: true, tuck: true }));
+  waveFrames.forEach((f, i) => items.push({ img: render([[f]], PALETTE, "#8f98bd", 5), x0: pad + i * (W * 5 + 12) - (i === 0 ? 0 : 0), y0: pad }));
+  const waveW = W;
+  W = 32;
+  const row2 = pad + H * 5 + 24;
+  Object.values(props).forEach((rows, i) => items.push({ img: renderGrid(rows, propPalette, 8), x0: pad + i * 144, y0: row2 }));
+  const row3 = row2 + 16 * 8 + 24;
+  const hi = heroIcons;
+  let hx = pad;
+  [hi.gradCap, hi.engineerOff, hi.engineerOn, hi.cricket].forEach((rows) => {
+    items.push({ img: renderGrid(rows, hi.palette, 8), x0: hx, y0: row3 });
+    hx += rows[0].length * 8 + 24;
+  });
+  writeFileSync(new URL("review.png", PREVIEW), composite(items, Math.max(pad * 2 + 5 * 144, pad * 2 + 4 * (waveW * 5 + 12)), row3 + 16 * 8 + pad));
 }
 console.log("sprites written to public/sprites and art/preview");

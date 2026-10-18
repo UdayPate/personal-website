@@ -1,0 +1,122 @@
+/**
+ * Station props: one small 16x16 machine per stage, drawn as letter grids like the sprites.
+ * Decorative only. Palette letters are shared by all five props.
+ *
+ *   m metal light   M metal shadow   d dark / hole   k screen black   n screen navy
+ *   o orange        O orange shadow  c cyan   g green   w white   y yellow
+ *   a / b / r       data fragments (blue / red / green, same colours as the intro sources)
+ */
+export const propPalette: Record<string, string> = {
+  m: "#8f98bd",
+  M: "#6c7396",
+  d: "#2b2f3a",
+  k: "#05080a",
+  n: "#12203d",
+  o: "#ff8c00",
+  O: "#b35f00",
+  c: "#00bfff",
+  g: "#00ff41",
+  w: "#f0f0f0",
+  y: "#ffd84a",
+  a: "#4aa3ff",
+  b: "#ff6b6b",
+  r: "#2fb968",
+};
+
+export const props = {
+  /** Extract: intake hopper, raw fragments dropping in */
+  hopper: [
+    "...a......b.....",
+    ".......r....a...",
+    "..b.............",
+    ".mmmmmmmmmmmmmm.",
+    ".mddadddbdddrdM.",
+    "..mdddddddddbM..",
+    "..mmdddddddMM...",
+    "...mmddddddM....",
+    "...MmmddddMM....",
+    "....MMmmmMM.....",
+    ".....MMmMM......",
+    "......oOo.......",
+    "......oOo.......",
+    ".mm...oOo...mm..",
+    ".MM.........MM..",
+    ".MM.........MM..",
+  ],
+  /** Transform: meshing gears */
+  gears: [
+    "................",
+    "....mmmm........",
+    ".mm.mmmM.MM.....",
+    ".mmmmmmmmMM.....",
+    "..mmmmmmMM......",
+    "mmmmmmmmMMMM....",
+    "mmmmmddmMMMM....",
+    "mmmmmddmMMMM....",
+    "mmmmmmmmMMMM....",
+    "..mmmmmmMM.ooo..",
+    ".mmmmmmmMMooooO.",
+    ".mm.mmmM.oooooOO",
+    "....mmMM.ooodoOO",
+    ".........ooooOOO",
+    "..........ooOOO.",
+    "...........oOO..",
+  ],
+  /** Load: database cylinder */
+  database: [
+    "................",
+    "...mmmmmmmmmm...",
+    "..mmmmmmmmmmmm..",
+    "..mMMMMMMMMMMM..",
+    "..dMMMMMMMMMMd..",
+    "..dMMMMMMMMMcd..",
+    "..mmmmmmmmmmmm..",
+    "..dMMMMMMMMMMd..",
+    "..dMMMMMMMMMgd..",
+    "..mmmmmmmmmmmm..",
+    "..dMMMMMMMMMMd..",
+    "..dMMMMMMMMMod..",
+    "..mmmmmmmmmmmm..",
+    "..dMMMMMMMMMMd..",
+    "...dddddddddd...",
+    "................",
+  ],
+  /** Serve: dashboard screen with bars */
+  dashboard: [
+    "................",
+    ".mmmmmmmmmmmmmm.",
+    ".mnnnnnnnnnnnnM.",
+    ".mnnnnnnnnnnngM.",
+    ".mnnnnnnnnnnnnM.",
+    ".mnnnnnnnnoonnM.",
+    ".mnnnnnnnnoonnM.",
+    ".mnnnnggnnoonnM.",
+    ".mnnccnggnoocnM.",
+    ".mnnccnggnoocnM.",
+    ".mnnccnggnoocnM.",
+    ".MMMMMMMMMMMMMM.",
+    ".......MM.......",
+    "......MMMM......",
+    "....MMMMMMMM....",
+    "................",
+  ],
+  /** Query: terminal with a prompt */
+  terminal: [
+    "................",
+    ".mmmmmmmmmmmmmm.",
+    ".mkkkkkkkkkkkkM.",
+    ".mkkgkkkkkkkkkM.",
+    ".mkkkgkkkkkkkkM.",
+    ".mkkkkgkkkkkkkM.",
+    ".mkkkgkkkkkkkkM.",
+    ".mkkgkkkkkkkkkM.",
+    ".mkkkkkkgggkkkM.",
+    ".mkkkkkkkkkkkkM.",
+    ".MMMMMMMMMMMMMM.",
+    ".......MM.......",
+    "......MMMM......",
+    "....MMMMMMMM....",
+    "................",
+    "................",
+  ],
+} as const;
