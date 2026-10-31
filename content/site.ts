@@ -1,18 +1,3 @@
-export type Stage = {
-  id: string;
-  label: string;
-  character: string;
-};
-
-export type PipelineItem = {
-  kind: "stage" | "checkpoint";
-  /** 1-5 for stages; undefined for checkpoints */
-  stage?: number;
-  label: string;
-  /** slug of the entry in content/projects.ts */
-  slug: string;
-};
-
 export const site = {
   name: "Uday Patel",
   pitch:
@@ -30,16 +15,8 @@ export const site = {
 
 export const totalStages = 5;
 
-/** Order of the pipeline, top to bottom. */
-export const pipeline: PipelineItem[] = [
-  { kind: "stage", stage: 1, label: "Extract", slug: "aislesave" },
-  { kind: "checkpoint", label: "Checkpoint", slug: "groovyweb" },
-  { kind: "stage", stage: 2, label: "Transform", slug: "airbnb-pipeline" },
-  { kind: "stage", stage: 3, label: "Load", slug: "apple-platform" },
-  { kind: "checkpoint", label: "Checkpoint", slug: "everlaw" },
-  { kind: "stage", stage: 4, label: "Serve", slug: "data-lens" },
-  { kind: "stage", stage: 5, label: "Query", slug: "cricket-intelligence" },
-];
+/** Names of the five stages, in order. Which project sits at each stage is set by `pipelineStage` in content/projects/*.md. */
+export const stageLabels = ["Extract", "Transform", "Load", "Serve", "Query"] as const;
 
 /** The three personal icons in the hero (art/icons.ts `heroIcons`). `text` is both the tooltip and the aria-label. */
 export const heroIcons = [
