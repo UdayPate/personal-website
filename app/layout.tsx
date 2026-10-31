@@ -3,6 +3,7 @@ import { Press_Start_2P, VT323 } from "next/font/google";
 import Hud from "@/components/Hud";
 import NavTracker from "@/components/NavTracker";
 import SkipLink from "@/components/SkipLink";
+import { profile } from "@/content/profile";
 import "./globals.css";
 
 // next/font downloads these fonts at build time and serves them from our own
@@ -20,9 +21,8 @@ const body = VT323({
 });
 
 export const metadata: Metadata = {
-  title: "Uday Patel | Udayverse",
-  description:
-    "Engineer by training, product thinker by habit. I build systems that people actually use.",
+  title: profile.pageTitle,
+  description: profile.metaDescription,
 };
 
 // viewport-fit=cover lets env(safe-area-inset-*) report the iPhone home-indicator inset.

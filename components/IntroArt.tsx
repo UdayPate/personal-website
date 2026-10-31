@@ -6,9 +6,10 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { PIPE_QUERY } from "./pipeQuery";
 import IconTip from "./IconTip";
 import { heroIcons } from "@/content/site";
+import type { Profile } from "@/content/types";
 
 // Where each fragment starts: it takes the colour of its source icon
-// (grad cap, glowing laptop, cricket bat; see content/site.ts).
+// (grad cap, glowing laptop, cricket bat; tooltip text is in content/profile.md).
 const POSITIONS = ["14%", "50%", "86%"];
 const ALIGN = ["left", "center", "right"] as const;
 // Sprite sheet index of each icon in public/sprites/hero.png (0 cap, 1-2 laptop off/on, 3 bat).
@@ -20,7 +21,7 @@ const FRAGMENTS = 33;
 //  - Desktop with motion: three source icons; as the visitor starts scrolling,
 //    pixel fragments fly out of them and clump into the stage-1 blob.
 //    (Scrubbed to scroll position, never pinned, nothing waits on it.)
-export default function IntroArt() {
+export default function IntroArt({ tooltips, firstName }: { tooltips: Profile["tooltips"]; firstName: string }) {
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -100,18 +101,18 @@ export default function IntroArt() {
       <div className="mt-6 flex flex-col items-center gap-4 pipe:hidden">
         <div className="flex items-center gap-5">
           {heroIcons.map((h, i) => (
-            <IconTip key={h.id} text={h.text} align={ALIGN[i]}>
+            <IconTip key={h.id} text={tooltips[h.id]} align={ALIGN[i]}>
               <HeroIcon index={SHEET_INDEX[i]} scale={3} bulb={h.id === "laptop"} />
             </IconTip>
           ))}
         </div>
-        <div role="img" aria-label="Pixel-art portrait of Uday holding a laptop" className="sprite-static" />
+        <div role="img" aria-label={`Pixel-art portrait of ${firstName} holding a laptop`} className="sprite-static" />
       </div>
       {/* desktop with motion: icons in one row, the blob forms in the middle slot */}
       <div ref={rootRef} className="relative mx-auto mt-10 hidden h-44 w-full max-w-3xl pipe:block">
         {heroIcons.map((h, i) => (
           <div key={h.id} data-icon className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2" style={{ left: POSITIONS[i] }}>
-            <IconTip text={h.text} align={ALIGN[i]}>
+            <IconTip text={tooltips[h.id]} align={ALIGN[i]}>
               <HeroIcon index={SHEET_INDEX[i]} scale={5} bulb={h.id === "laptop"} />
             </IconTip>
           </div>

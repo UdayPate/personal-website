@@ -46,3 +46,31 @@ export type PipelineItem = {
   /** slug of the project or checkpoint file */
   slug: string;
 };
+
+export type Education = {
+  degree: string;
+  school: string;
+  dates?: string;
+};
+
+/** Everything about Uday, from content/profile.md. */
+export type Profile = {
+  name: string;
+  /** Used in screen-reader labels, e.g. "Pixel-art portrait of Uday". */
+  firstName: string;
+  pitch: string;
+  subtitle: string;
+  email: string;
+  linkedin: string;
+  github: string;
+  /** Path under public/, e.g. "/resume.pdf". */
+  resume: string;
+  education: Education[];
+  /** The browser tab title and search-result description of the home page. */
+  pageTitle: string;
+  metaDescription: string;
+  /** Hero icon tooltips ({projectCount} and {experienceCount} already filled in). */
+  tooltips: { grad: string; laptop: string; cricket: string };
+  /** The Markdown body of profile.md: the About text. */
+  about: string;
+};

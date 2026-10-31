@@ -1,23 +1,47 @@
 // Reads content/projects/*.md and content/experience/*.md at build time and
 // checks every field. Any problem stops the build with a message that names the
 // file. (This runs on the server only: it uses the file system.)
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { parse as parseYaml } from "yaml";
 import { stageLabels, totalStages } from "./site";
-import type { Checkpoint, PipelineItem, Project, ProjectLinks } from "./types";
+import type { Checkpoint, Education, PipelineItem, Profile, Project, ProjectLinks } from "./types";
 
 const CONTENT = path.join(process.cwd(), "content");
 const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 const LINK_KEYS = ["github", "demo", "screenshots"] as const;
 const PROJECT_KEYS = ["title", "dates", "problem", "pipelineStage", "projectsOnly", "summary", "tech", "highlight", "links"];
 const CHECKPOINT_KEYS = ["title", "dates", "afterStage", "bullets"];
+const PROFILE_KEYS = ["name", "firstName", "pitch", "subtitle", "email", "linkedin", "github", "resume", "education", "pageTitle", "metaDescription", "tooltips"];
+const EDUCATION_KEYS = ["degree", "school", "dates"];
+const TOOLTIP_KEYS = ["grad", "laptop", "cricket"] as const;
+const PROFILE_FILE = "content/profile.md";
 
 type Loaded<T> = { file: string; item: T };
 const errors: string[] = [];
 // stage -> files that declare it (recorded even if the file has other errors, so one typo does not also report a "missing stage")
 const claimed = new Map<number, string[]>();
 const fail = (file: string, msg: string) => errors.push(`${file}: ${msg}`);
+
+function parseFile(file: string, text: string): { data: Record<string, unknown>; body: string } | undefined {
+  const m = /^---\r?\n([\s\S]*?)\r?\n---[ \t]*(?:\r?\n([\s\S]*))?$/.exec(text.replace(/^\uFEFF/, ""));
+  if (!m) {
+    fail(file, "must start with a --- frontmatter block (--- ... ---) followed by the Markdown body");
+    return undefined;
+  }
+  let data: unknown;
+  try {
+    data = parseYaml(m[1]);
+  } catch (e) {
+    fail(file, `frontmatter is not valid YAML: ${(e as Error).message.split("\n")[0]}`);
+    return undefined;
+  }
+  if (data === null || typeof data !== "object" || Array.isArray(data)) {
+    fail(file, "frontmatter must be a list of `key: value` lines");
+    return undefined;
+  }
+  return { data: data as Record<string, unknown>, body: (m[2] ?? "").trim() };
+}
 
 function readEntries(dir: string): { file: string; slug: string; data: Record<string, unknown>; body: string }[] {
   const full = path.join(CONTENT, dir);
@@ -29,24 +53,8 @@ function readEntries(dir: string): { file: string; slug: string; data: Record<st
   }
   return names.flatMap((name) => {
     const file = `content/${dir}/${name}`;
-    const text = readFileSync(path.join(full, name), "utf8").replace(/^﻿/, "");
-    const m = /^---\r?\n([\s\S]*?)\r?\n---[ \t]*(?:\r?\n([\s\S]*))?$/.exec(text);
-    if (!m) {
-      fail(file, "must start with a --- frontmatter block (--- ... ---) followed by the Markdown body");
-      return [];
-    }
-    let data: unknown;
-    try {
-      data = parseYaml(m[1]);
-    } catch (e) {
-      fail(file, `frontmatter is not valid YAML: ${(e as Error).message.split("\n")[0]}`);
-      return [];
-    }
-    if (data === null || typeof data !== "object" || Array.isArray(data)) {
-      fail(file, "frontmatter must be a list of `key: value` lines");
-      return [];
-    }
-    return [{ file, slug: name.slice(0, -3), data: data as Record<string, unknown>, body: (m[2] ?? "").trim() }];
+    const parsed = parseFile(file, readFileSync(path.join(full, name), "utf8"));
+    return parsed ? [{ file, slug: name.slice(0, -3), ...parsed }] : [];
   });
 }
 
@@ -149,6 +157,87 @@ function loadCheckpoints(): Loaded<Checkpoint>[] {
   });
 }
 
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const webUrl = (v: unknown) => typeof v === "string" && /^https?:\/\/\S+$/.test(v);
+
+function loadProfile(counts: { projectCount: number; experienceCount: number }): Profile | undefined {
+  const file = PROFILE_FILE;
+  const before = errors.length;
+  let parsed;
+  try {
+    parsed = parseFile(file, readFileSync(path.join(process.cwd(), file), "utf8"));
+  } catch {
+    errors.push(`${file}: file not found`);
+    return undefined;
+  }
+  if (!parsed) return undefined;
+  const { data, body } = parsed;
+  unknownKeys(file, data, PROFILE_KEYS);
+  const name = str(file, data, "name", true);
+  const firstName = str(file, data, "firstName", true);
+  const pitch = str(file, data, "pitch", true);
+  const subtitle = str(file, data, "subtitle", true);
+  const pageTitle = str(file, data, "pageTitle", true);
+  const metaDescription = str(file, data, "metaDescription", true);
+  const email = str(file, data, "email", true);
+  if (email && !EMAIL.test(email)) fail(file, `"email" is not a valid email address (got ${JSON.stringify(email)})`);
+  const urls: Record<string, string | undefined> = {};
+  for (const k of ["linkedin", "github"]) {
+    urls[k] = str(file, data, k, true);
+    if (urls[k] && !webUrl(urls[k])) fail(file, `"${k}" must be a full web address starting with http:// or https:// (got ${JSON.stringify(urls[k])})`);
+  }
+  const resume = str(file, data, "resume", true);
+  if (resume && !(resume.startsWith("/") && existsSync(path.join(process.cwd(), "public", resume)))) {
+    fail(file, `"resume" must be a path to a file in public/, like "/resume.pdf" (nothing found at public${resume})`);
+  }
+
+  let education: Education[] | undefined;
+  const ed = data.education;
+  if (ed === undefined) fail(file, `missing required field "education"`);
+  else if (!Array.isArray(ed) || ed.length === 0) fail(file, `"education" must be a list with at least one entry (got ${describe(ed)})`);
+  else {
+    education = [];
+    ed.forEach((e, i) => {
+      const where = `education entry ${i + 1}`;
+      if (e === null || typeof e !== "object" || Array.isArray(e)) return fail(file, `${where} must have "degree" and "school" (got ${describe(e)})`);
+      const o = e as Record<string, unknown>;
+      for (const k of Object.keys(o)) if (!EDUCATION_KEYS.includes(k)) fail(file, `${where}: unknown field "${k}" (allowed: ${EDUCATION_KEYS.join(", ")})`);
+      const degree = str(`${file} (${where})`, o, "degree", true);
+      const school = str(`${file} (${where})`, o, "school", true);
+      const dates = str(`${file} (${where})`, o, "dates", false);
+      if (degree && school) education!.push({ degree, school, dates });
+    });
+  }
+
+  // hero icon tooltips; {projectCount} and {experienceCount} are filled in from the content files
+  let tooltips: Profile["tooltips"] | undefined;
+  const tt = data.tooltips;
+  if (tt === undefined) fail(file, `missing required field "tooltips"`);
+  else if (tt === null || typeof tt !== "object" || Array.isArray(tt)) fail(file, `"tooltips" must have grad, laptop and cricket (got ${describe(tt)})`);
+  else {
+    const o = tt as Record<string, unknown>;
+    for (const k of Object.keys(o)) if (!(TOOLTIP_KEYS as readonly string[]).includes(k)) fail(file, `tooltips: unknown field "${k}" (allowed: ${TOOLTIP_KEYS.join(", ")})`);
+    const out: Record<string, string> = {};
+    for (const k of TOOLTIP_KEYS) {
+      const v = str(`${file} (tooltips)`, o, k, true);
+      if (v === undefined) continue;
+      out[k] = v.replace(/\{(\w+)\}/g, (whole, key: string) => {
+        if (key in counts) return String(counts[key as keyof typeof counts]);
+        fail(file, `tooltips.${k}: unknown placeholder ${whole} (allowed: {projectCount}, {experienceCount})`);
+        return whole;
+      });
+    }
+    if (Object.keys(out).length === TOOLTIP_KEYS.length) tooltips = out as Profile["tooltips"];
+  }
+  if (!body) fail(file, "the Markdown body (the About text, below the frontmatter) is empty");
+  if (errors.length > before) return undefined;
+  return {
+    name: name!, firstName: firstName!, pitch: pitch!, subtitle: subtitle!, email: email!,
+    linkedin: urls.linkedin!, github: urls.github!, resume: resume!, education: education!,
+    pageTitle: pageTitle!, metaDescription: metaDescription!, tooltips: tooltips!, about: body,
+  };
+}
+
 function build() {
   const p = loadProjects();
   const c = loadCheckpoints();
@@ -168,6 +257,8 @@ function build() {
     if (files.length > 1) errors.push(`Stage ${s} is claimed by more than one project: ${files.join(" and ")}. Each stage needs exactly one project.`);
   }
 
+  const profile = loadProfile({ projectCount: p.length, experienceCount: c.length });
+
   if (errors.length) {
     throw new Error(`\n\nContent problems (fix these files, then build again):\n${errors.map((e) => `  - ${e}`).join("\n")}\n`);
   }
@@ -181,7 +272,7 @@ function build() {
     pipeline.push({ kind: "stage", stage: s, label: stageLabels[s - 1], slug: projects.find((x) => x.pipelineStage === s)!.slug });
     for (const cp of checkpoints) if (cp.afterStage === s) pipeline.push({ kind: "checkpoint", label: "Checkpoint", slug: cp.slug });
   }
-  return { projects, checkpoints, pipeline };
+  return { profile: profile!, projects, checkpoints, pipeline };
 }
 
 export const content = build();

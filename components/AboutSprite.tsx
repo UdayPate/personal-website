@@ -7,7 +7,7 @@ import { PIPE_QUERY } from "./pipeQuery";
 // motion it waves when it scrolls into view (and when hovered or clicked), then
 // settles into its idle bounce. Phones, reduced motion and no-JS keep the still
 // portrait: without data-anim the CSS shows the first idle frame.
-export default function AboutSprite() {
+export default function AboutSprite({ firstName }: { firstName: string }) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -52,5 +52,5 @@ export default function AboutSprite() {
     };
   }, []);
 
-  return <div ref={ref} role="img" aria-label="Pixel-art portrait of Uday, holding a laptop under one arm" className="wave" />;
+  return <div ref={ref} role="img" aria-label={`Pixel-art portrait of ${firstName}, holding a laptop under one arm`} className="wave" />;
 }

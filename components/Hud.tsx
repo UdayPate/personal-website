@@ -1,4 +1,4 @@
-import { site } from "@/content/site";
+import { profile } from "@/content/profile";
 import HudLive from "./HudLive";
 import HudName from "./HudName";
 import PixelIcon from "./PixelIcon";
@@ -30,7 +30,7 @@ export default function Hud() {
       className="sticky top-0 z-50 border-b-4 border-orange bg-background px-[max(0.75rem,env(safe-area-inset-left))] py-2"
     >
       <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-4 gap-y-1">
-        <HudName name={site.name} />
+        <HudName name={profile.name} />
         <HudLive />
         <nav
           aria-label="Quick links"
@@ -38,7 +38,7 @@ export default function Hud() {
         >
           <a
             className={btn}
-            href={site.resume}
+            href={profile.resume}
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Resume (CV PDF, opens in a new tab)"
@@ -47,7 +47,7 @@ export default function Hud() {
           </a>
           <a
             className={btn}
-            href={site.links.github}
+            href={profile.github}
             target="_blank"
             rel="noopener noreferrer"
             aria-label="GitHub profile (opens in a new tab)"
@@ -56,7 +56,7 @@ export default function Hud() {
           </a>
           <a
             className={btn}
-            href={site.links.linkedin}
+            href={profile.linkedin}
             target="_blank"
             rel="noopener noreferrer"
             aria-label="LinkedIn profile (opens in a new tab)"

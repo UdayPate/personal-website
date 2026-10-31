@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { site } from "@/content/site";
 import { pipeline } from "@/content/projects";
+import { profile } from "@/content/profile";
 import Station from "@/components/Station";
 import Pipeline from "@/components/Pipeline";
 import IntroArt from "@/components/IntroArt";
@@ -10,10 +10,10 @@ import AboutSprite from "@/components/AboutSprite";
 import PixelIcon from "@/components/PixelIcon";
 
 const contactLinks = [
-  { label: "EMAIL", icon: "contact", href: `mailto:${site.links.email}`, aria: `Email ${site.links.email}`, external: false },
-  { label: "LINKEDIN", icon: "linkedin", href: site.links.linkedin, aria: "LinkedIn profile (opens in a new tab)", external: true },
-  { label: "GITHUB", icon: "github", href: site.links.github, aria: "GitHub profile (opens in a new tab)", external: true },
-  { label: "RESUME", icon: "resume", href: site.resume, aria: "Resume (PDF, opens in a new tab)", external: true },
+  { label: "EMAIL", icon: "contact", href: `mailto:${profile.email}`, aria: `Email ${profile.email}`, external: false },
+  { label: "LINKEDIN", icon: "linkedin", href: profile.linkedin, aria: "LinkedIn profile (opens in a new tab)", external: true },
+  { label: "GITHUB", icon: "github", href: profile.github, aria: "GitHub profile (opens in a new tab)", external: true },
+  { label: "RESUME", icon: "resume", href: profile.resume, aria: "Resume (PDF, opens in a new tab)", external: true },
 ] as const;
 
 export default function Home() {
@@ -22,11 +22,11 @@ export default function Home() {
       <ScrollProgress />
       <section className="px-4 py-8 text-center sm:py-12 pipe:flex pipe:min-h-[calc(100svh-var(--hud-h))] pipe:flex-col pipe:justify-center pipe:py-6">
         <h1 className="font-pixel text-2xl leading-relaxed text-orange sm:text-4xl pipe:text-5xl">
-          {site.name.toUpperCase()}
+          {profile.name.toUpperCase()}
         </h1>
-        <p className="mx-auto mt-6 max-w-xl text-2xl text-foreground pipe:max-w-2xl pipe:text-3xl">{site.pitch}</p>
+        <p className="mx-auto mt-6 max-w-xl text-2xl text-foreground pipe:max-w-2xl pipe:text-3xl">{profile.pitch}</p>
         <p className="mt-4 font-pixel text-xs leading-relaxed text-cyan sm:text-xs pipe:text-sm">
-          {site.subtitle}
+          {profile.subtitle}
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-3 pipe:mt-10">
           <a
@@ -42,7 +42,7 @@ export default function Home() {
             ALL PROJECTS
           </Link>
         </div>
-        <IntroArt />
+        <IntroArt tooltips={profile.tooltips} firstName={profile.firstName} />
       </section>
 
       <Pipeline>
@@ -57,12 +57,12 @@ export default function Home() {
           <div>
             <p className="font-pixel text-xs text-green">LOAD COMPLETE</p>
             <h2 className="mt-2 font-pixel text-base text-orange">ABOUT</h2>
-            <p className="mt-4 text-foreground/90">{site.about}</p>
+            <p className="mt-4 text-foreground/90">{profile.about}</p>
           </div>
           <div className="mx-auto w-full max-w-sm border-4 border-green bg-background p-4 shadow-[6px_6px_0_0_var(--green)]">
             <p className="font-pixel text-xs text-green">READY FOR QUERIES</p>
             <div className="mt-4 flex justify-center">
-              <AboutSprite />
+              <AboutSprite firstName={profile.firstName} />
             </div>
             <div aria-hidden className="belt !static !h-4 !border-t-4" />
           </div>
@@ -74,7 +74,7 @@ export default function Home() {
           <div>
             <h2 className="font-pixel text-base text-orange">CONTACT</h2>
             <p className="mt-4 text-foreground/90">
-              The quickest way to reach me is email: <span className="text-cyan">{site.links.email}</span>
+              The quickest way to reach me is email: <span className="text-cyan">{profile.email}</span>
             </p>
           </div>
           <ul className="grid grid-cols-2 gap-3">

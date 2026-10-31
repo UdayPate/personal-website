@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { checkpoints, projects } from "@/content/projects";
-import { site } from "@/content/site";
+import { profile } from "@/content/profile";
 import ProjectCard from "@/components/ProjectCard";
 import CheckpointCard from "@/components/CheckpointCard";
 
 export const metadata: Metadata = {
   title: "Projects | Udayverse",
-  description: `All projects and experience from ${site.name}: data engineering, analytics, ML and software.`,
+  description: `All projects and experience from ${profile.name}: data engineering, analytics, ML and software.`,
 };
 
 export default function ProjectsPage() {
