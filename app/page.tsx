@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { pipeline, site } from "@/content/site";
+import { site } from "@/content/site";
+import { pipeline } from "@/content/projects";
 import Station from "@/components/Station";
 import Pipeline from "@/components/Pipeline";
 import IntroArt from "@/components/IntroArt";

@@ -1,6 +1,5 @@
-import type { PipelineItem } from "@/content/site";
 import { totalStages } from "@/content/site";
-import { getCheckpoint, getProject } from "@/content/projects";
+import { getCheckpoint, getProject, type PipelineItem } from "@/content/projects";
 import ProjectCard from "./ProjectCard";
 import CheckpointCard from "./CheckpointCard";
 

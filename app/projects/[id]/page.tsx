@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProject, projects } from "@/content/projects";
+import { renderMarkdown } from "@/content/markdown";
 
 const linkBtn =
   "inline-flex min-h-11 items-center border-2 border-orange px-3 font-pixel text-xs text-orange hover:bg-orange hover:text-background";
@@ -41,7 +42,7 @@ export default async function ProjectPage({ params }: PageProps<"/projects/[id]"
       <h1 className="mt-6 font-pixel text-lg leading-relaxed text-orange sm:text-xl">{title}</h1>
       {dates && <p className="text-foreground/80">{dates}</p>}
       {problem && <p className="mt-4 text-foreground">{problem}</p>}
-      <p className="mt-4 text-foreground/80">{details}</p>
+      <div dangerouslySetInnerHTML={{ __html: renderMarkdown(details) }} />
 
       <h2 className="mt-8 font-pixel text-xs text-green">TECH</h2>
       <ul className="mt-3 flex flex-wrap gap-2" aria-label="Tech stack">
