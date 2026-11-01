@@ -65,6 +65,7 @@ export default function TrackController() {
 
     // The visitor edits the #hash in the address bar (a same-page navigation).
     const onHashChange = () => {
+      if (!window.matchMedia("(prefers-reduced-motion: no-preference)").matches) return; // static layout: the browser scrolls to the anchor itself
       const id = hashTarget();
       if (id && trackIdsSet.has(id)) chooseTrack(id as TrackId, { instant: window.scrollY > trackStartY(trackStore.get().visible) + 300 });
       else if (id && stationTrack(id)) goToStation(id, stationTrack(id)!);

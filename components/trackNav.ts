@@ -48,7 +48,8 @@ export async function chooseTrack(track: TrackId, opts: { delay?: number; instan
   }
   await ready(track);
   const y = Math.max(0, Math.round(trackStartY(track)));
-  window.scrollTo({ top: y, behavior: instant ? "auto" : "smooth" });
+  const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches; // no smooth scrolling for reduced motion
+  window.scrollTo({ top: y, behavior: instant || calm ? "auto" : "smooth" });
   if (instant) hopCharacter(track);
 }
 
