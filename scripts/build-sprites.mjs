@@ -6,8 +6,8 @@
 //
 // Stages 2 (half-res), 3 and the laptop are drawn by hand in art/character.ts.
 // Stage 1 (glitch blob) is derived from stage 3 below; tweak toBlob() to change it.
-import { deflateSync } from "node:zlib";
 import { mkdirSync, writeFileSync } from "node:fs";
+import { composite, hex, png, renderGrid } from "./lib/pixel.mjs";
 import { hudIcons, sourceIcons, heroIcons } from "../art/icons.ts";
 import { props, propPalette } from "../art/props.ts";
 import { PALETTE, HEAD, HEAD_TOP, TORSO, TORSO_TOP, LAPTOP, LAPTOP_TOP, LAPTOP_TUCK, LAPTOP_TUCK_TOP, HEAD8, HEAD8_TOP, TORSO8, TORSO8_TOP } from "../art/character.ts";
@@ -18,45 +18,6 @@ const OUT = new URL("../public/sprites/", import.meta.url);
 const PREVIEW = new URL("../art/preview/", import.meta.url);
 mkdirSync(OUT, { recursive: true });
 mkdirSync(PREVIEW, { recursive: true });
-
-// ---------- tiny PNG encoder (RGBA, no dependencies) ----------
-const crcTable = Array.from({ length: 256 }, (_, n) => {
-  let c = n;
-  for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
-  return c >>> 0;
-});
-const crc32 = (buf) => {
-  let c = 0xffffffff;
-  for (const b of buf) c = crcTable[(c ^ b) & 255] ^ (c >>> 8);
-  return (c ^ 0xffffffff) >>> 0;
-};
-const chunk = (type, data) => {
-  const len = Buffer.alloc(4);
-  len.writeUInt32BE(data.length);
-  const td = Buffer.concat([Buffer.from(type), data]);
-  const crc = Buffer.alloc(4);
-  crc.writeUInt32BE(crc32(td));
-  return Buffer.concat([len, td, crc]);
-};
-function png(width, height, rgba) {
-  const raw = Buffer.alloc((width * 4 + 1) * height);
-  for (let y = 0; y < height; y++) {
-    raw[y * (width * 4 + 1)] = 0;
-    rgba.copy(raw, y * (width * 4 + 1) + 1, y * width * 4, (y + 1) * width * 4);
-  }
-  const ihdr = Buffer.alloc(13);
-  ihdr.writeUInt32BE(width, 0);
-  ihdr.writeUInt32BE(height, 4);
-  ihdr[8] = 8;
-  ihdr[9] = 6;
-  return Buffer.concat([
-    Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
-    chunk("IHDR", ihdr),
-    chunk("IDAT", deflateSync(raw)),
-    chunk("IEND", Buffer.alloc(0)),
-  ]);
-}
-const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
 
 // ---------- grid helpers ----------
 const blank = () => Array.from({ length: H }, () => Array(W).fill("."));
@@ -291,20 +252,6 @@ const sheets = STAGES.map((s) => {
 });
 
 // ---------- preview images (dark page background, scaled up) ----------
-function composite(items, width, height, bg = "#0a0a0f") {
-  const buf = Buffer.alloc(width * height * 4);
-  const [br, bgc, bb] = hex(bg);
-  for (let i = 0; i < width * height; i++) { buf[i * 4] = br; buf[i * 4 + 1] = bgc; buf[i * 4 + 2] = bb; buf[i * 4 + 3] = 255; }
-  for (const { img, x0, y0 } of items)
-    for (let y = 0; y < img.h; y++)
-      for (let x = 0; x < img.w; x++) {
-        const o = (y * img.w + x) * 4;
-        if (!img.buf[o + 3]) continue;
-        const d = ((y0 + y) * width + x0 + x) * 4;
-        buf[d] = img.buf[o]; buf[d + 1] = img.buf[o + 1]; buf[d + 2] = img.buf[o + 2];
-      }
-  return png(width, height, buf);
-}
 { // four stages side by side (idle frame, 6x) + a walk strip underneath (2x)
   const items = [];
   const gap = 28;
@@ -326,34 +273,6 @@ function composite(items, width, height, bg = "#0a0a0f") {
 }
 
 // ---------- source icons (intro) + laptop prop (Serve station) ----------
-function renderGrid(rows, palette, scale = 1, outlineColor = null) {
-  const grid = rows.map((r) => [...r]);
-  const pad = outlineColor ? 1 : 0;
-  const h = grid.length + pad * 2;
-  const w = grid[0].length + pad * 2;
-  const cv = Array.from({ length: h }, () => Array(w).fill("."));
-  grid.forEach((row, y) => row.forEach((c, x) => (cv[y + pad][x + pad] = c)));
-  if (outlineColor)
-    for (let y = 0; y < h; y++)
-      for (let x = 0; x < w; x++) {
-        if (cv[y][x] !== ".") continue;
-        const near = [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => (grid[y - pad + dy]?.[x - pad + dx] ?? ".") !== ".");
-        if (near) cv[y][x] = "#";
-      }
-  const buf = Buffer.alloc(w * scale * h * scale * 4);
-  for (let y = 0; y < h; y++)
-    for (let x = 0; x < w; x++) {
-      const c = cv[y][x];
-      if (c === ".") continue;
-      const [r, g, b] = hex(c === "#" ? outlineColor : palette[c]);
-      for (let sy = 0; sy < scale; sy++)
-        for (let sx = 0; sx < scale; sx++) {
-          const o = ((y * scale + sy) * w * scale + x * scale + sx) * 4;
-          buf[o] = r; buf[o + 1] = g; buf[o + 2] = b; buf[o + 3] = 255;
-        }
-    }
-  return { w: w * scale, h: h * scale, buf };
-}
 {
   const icons = Object.values(sourceIcons.icons);
   const imgs = icons.map((rows) => renderGrid(rows, sourceIcons.palette));
@@ -395,24 +314,5 @@ function renderGrid(rows, palette, scale = 1, outlineColor = null) {
   const hb = Buffer.alloc(16 * hl.length * 16 * 4);
   hl.forEach((img, i) => { for (let y = 0; y < 16; y++) img.buf.copy(hb, (y * 16 * hl.length + i * 16) * 4, y * 16 * 4, (y + 1) * 16 * 4); });
   writeFileSync(new URL("hero.png", OUT), png(16 * hl.length, 16, hb));
-}
-{ // review image: 4 wave frames (laptop under arm), 5 station props, 3 hero icons (+ bulb on/off)
-  const items = [];
-  const pad = 20;
-  W = 40;
-  const waveFrames = WAVE.map((p) => frame3({ ...p, nearArm: 0, laptop: true, tuck: true }));
-  waveFrames.forEach((f, i) => items.push({ img: render([[f]], PALETTE, "#8f98bd", 5), x0: pad + i * (W * 5 + 12) - (i === 0 ? 0 : 0), y0: pad }));
-  const waveW = W;
-  W = 32;
-  const row2 = pad + H * 5 + 24;
-  Object.values(props).forEach((rows, i) => items.push({ img: renderGrid(rows, propPalette, 8), x0: pad + i * 144, y0: row2 }));
-  const row3 = row2 + 16 * 8 + 24;
-  const hi = heroIcons;
-  let hx = pad;
-  [hi.gradCap, hi.engineerOff, hi.engineerOn, hi.cricket].forEach((rows) => {
-    items.push({ img: renderGrid(rows, hi.palette, 8), x0: hx, y0: row3 });
-    hx += rows[0].length * 8 + 24;
-  });
-  writeFileSync(new URL("review.png", PREVIEW), composite(items, Math.max(pad * 2 + 5 * 144, pad * 2 + 4 * (waveW * 5 + 12)), row3 + 16 * 8 + pad));
 }
 console.log("sprites written to public/sprites and art/preview");

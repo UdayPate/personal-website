@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "sprites": "NODE_NO_WARNINGS=1 node --experimental-strip-types scripts/build-sprites.mjs"
+    "sprites": "NODE_NO_WARNINGS=1 node --experimental-strip-types scripts/build-sprites.mjs && NODE_NO_WARNINGS=1 node --experimental-strip-types scripts/build-track-art.mjs"
   },
   "dependencies": {
     "gsap": "^3.15.0",
