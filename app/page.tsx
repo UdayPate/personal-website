@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { tracks } from "@/content/tracks";
+import { totalStations, tracks } from "@/content/tracks";
 import TrackSection from "@/components/TrackSection";
 import Signpost from "@/components/Signpost";
 import Junction from "@/components/Junction";
@@ -63,7 +63,7 @@ export default function Home() {
           {tracks[t].map((st) => (
             <Station key={st.slug} station={st} />
           ))}
-          <Signpost track={t} />
+          <Signpost track={t} totalStations={totalStations} />
         </TrackSection>
       ))}
       </div>

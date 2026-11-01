@@ -352,6 +352,52 @@ body {
   .carriage { transition: none; }
 }
 
+/* merge: the three rails join back into one belt (merge.png), the belt leaves to the right */
+.merge-art {
+  --rs: 4;
+  width: calc(192px * var(--rs));
+  height: calc(80px * var(--rs));
+  background: url(/sprites/merge.png) no-repeat 0 0 / 100% 100%;
+  image-rendering: pixelated;
+}
+.belt-stub-out {
+  right: auto;
+  left: 100%;
+}
+
+/* signpost (post.png 16x72) and arrow boards (board-*.png 36x16, 9-slice: 6px left cap, 10px arrow tip) */
+.post {
+  --s: 3;
+  flex: none;
+  width: calc(16px * var(--s));
+  height: calc(72px * var(--s));
+  background: url(/sprites/post.png) 0 0 / 100% 100% no-repeat;
+  image-rendering: pixelated;
+}
+.board {
+  --s: 3;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: calc(16px * var(--s));
+  min-width: 11rem;
+  padding: 0 4px;
+  border-style: solid;
+  border-width: 0 calc(10px * var(--s)) 0 calc(6px * var(--s));
+  border-image-source: var(--board);
+  border-image-slice: 0 10 0 6 fill;
+  border-image-width: 0 calc(10px * var(--s)) 0 calc(6px * var(--s));
+  border-image-repeat: stretch;
+  image-rendering: pixelated;
+  font-family: var(--font-pixel), monospace;
+  font-size: 0.75rem;
+  color: #fff;
+  margin-left: -2px;
+}
+.board:hover { filter: brightness(1.25); }
+.board-cyan { --board: url(/sprites/board-cyan.png); }
+.board-green { --board: url(/sprites/board-green.png); color: #0a0a0f; }
+
 /* short hop when the character is moved to another track's start */
 .char-hop { animation: char-hop 0.45s ease-out 1; }
 @keyframes char-hop {
