@@ -75,7 +75,7 @@ const place = (grid, x0, y0, scale) => items.push({ img: img(grid, scale), x0, y
 
 // control box: panel with three mock buttons (cyan bars; the real ones are HTML), lights and the lever
 {
-  const W = 150, H = 70;
+  const W = 150, H = 86;
   const box = nineSlice(panel, W, H);
   // a heading bar stands in for the "CHOOSE YOUR TRACK" text
   const g = box.slice();
@@ -83,13 +83,17 @@ const place = (grid, x0, y0, scale) => items.push({ img: img(grid, scale), x0, y
   bar(14, 12, 62, 4, "o");
   const states = ["red", "yellow", "green"]; // one light per button: shows all three colours
   [0, 1, 2].forEach((i) => {
-    const y = 22 + i * 14;
-    bar(14, y, 74, 12, "c");
-    bar(15, y + 1, 72, 10, "k");
-    blit(g, lights[states[i]], 18, y + 2); // 8x8 light
-    bar(30, y + 5, 40 + i * 6, 2, "c"); // label stand-in
+    const y = 24 + i * 18;
+    const selected = i === 2; // the green one: a thick white + green border as well as the white-ringed light
+    bar(14, y, 74, 14, selected ? "w" : "c");
+    bar(selected ? 15 : 15, y + 1, 72, 12, selected ? "g" : "k");
+    bar(17, y + 3, 68, 8, "k");
+    blit(g, lights[states[i]], 20, y + 3); // 8x8 light
+    bar(32, y + 6, 40 + i * 6, 2, selected ? "g" : "c"); // label stand-in
   });
-  blit(g, lever[3], 104, 24); // centre position
+  // the lever is shown twice as big as its sprite (the pose frames themselves stay 24x24)
+  const big = lever[3].flatMap((r) => { const d = [...r].map((c) => c + c).join(""); return [d, d]; });
+  blit(g, big, 90, 22); // centre position
   place(g, 20, 20, 3);
 }
 // lever: all three positions + the overshoot frames (3-frame snaps: start -> overshoot -> end)
@@ -106,13 +110,13 @@ const RS = 2;
   const cy = RAIL_Y[i] - 6;
   const withC = g.slice();
   blit(withC, c, GUIDE_X - 6, Math.max(0, Math.min(RAILS_H - 12, cy)));
-  place(withC, 20 + i * (RAILS_W * RS + 24), 240, RS);
+  place(withC, 20 + i * (RAILS_W * RS + 24), 292, RS);
 });
-place(merge, 20, 240 + RAILS_H * RS + 20, RS);
+place(merge, 20, 292 + RAILS_H * RS + 20, RS);
 // signpost: post + boards (cyan = another track, green = FINISH); each board carries a light (yellow = not visited, green = visited)
 {
   const x0 = 20 + RAILS_W * RS + 60;
-  const y0 = 240 + RAILS_H * RS + 20;
+  const y0 = 292 + RAILS_H * RS + 20;
   place(post, x0, y0, 3);
   [boards.cyan, boards.cyan, boards.green].forEach((b, i) => {
     const bx = x0 + 36, by = y0 + 10 + i * 60;
@@ -121,7 +125,7 @@ place(merge, 20, 240 + RAILS_H * RS + 20, RS);
   });
 }
 // Education props (diploma, certificate, trophy, loading, done) and Experience props (desk, cabinet, whiteboard), 6x
-const propsY = 240 + RAILS_H * RS + 20 + RAILS_H * RS + 40;
+const propsY = 292 + RAILS_H * RS + 20 + RAILS_H * RS + 40;
 Object.values(educationProps).forEach((g, i) => place(g, 20 + i * 112, propsY, 6));
 Object.values(officeProps).forEach((g, i) => place(g, 20 + (5 + i) * 112 + 24, propsY, 6));
 // HUD lights: the tiny 1x version and a 2x version, in a SWITCH TRACK-like row

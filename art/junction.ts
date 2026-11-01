@@ -51,7 +51,9 @@ const put = (cv: Cv, x: number, y: number, c: string) => {
 // ---------- signal lights (8x8): a dark housing with one lamp ----------
 const LAMP = [".dddddd.", "dhhaaaad", "dhaaaaad", "daaaaaad", "daaaaasd", "daaaassd", "dssssssd", ".dddddd."];
 const lamp = (a: string, h: string, s: string) => LAMP.map((r) => [...r].map((c) => (c === "a" ? a : c === "h" ? h : c === "s" ? s : c)).join(""));
-export const lights = { red: lamp("r", "p", "R"), yellow: lamp("y", "q", "Y"), green: lamp("g", "j", "G") };
+/** Green means "selected / visited" and always carries two extra cues besides its colour: a white ring and a white check mark. */
+const GREEN_SELECTED = [".wwwwww.", "wjgggggw", "wggggwgw", "wgwgwggw", "wggwgggw", "wgggggGw", "wGGGGGGw", ".wwwwww."];
+export const lights = { red: lamp("r", "p", "R"), yellow: lamp("y", "q", "Y"), green: GREEN_SELECTED };
 
 // ---------- panel frame (24x24, 8px border: used with border-image slice 8) ----------
 export const panel = (() => {
