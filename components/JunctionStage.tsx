@@ -116,7 +116,6 @@ export default function JunctionStage({ counts }: { counts: Record<TrackId, numb
         <button
           type="button"
           aria-pressed={on}
-          aria-label={`${t.heading} track, ${counts[t.id]} stations`}
           onClick={() => choose(t.id)}
           className="group flex min-h-14 w-full items-center justify-between gap-3 border-2 border-cyan px-3 py-2 text-left font-pixel text-xs text-cyan hover:bg-cyan hover:text-background aria-pressed:border-white aria-pressed:text-green aria-pressed:shadow-[inset_0_0_0_3px_var(--green)] aria-pressed:hover:bg-green aria-pressed:hover:text-background"
         >
@@ -124,7 +123,7 @@ export default function JunctionStage({ counts }: { counts: Record<TrackId, numb
             <Light state={lightFor(t.id, selected)} scale={2} />
             {t.label}
           </span>
-          <span aria-hidden className="opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 pointer-coarse:opacity-100">
+          <span className="opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 pointer-coarse:opacity-100">
             {counts[t.id]} STATIONS
           </span>
         </button>
