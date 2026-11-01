@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useSyncExternalStore, type ReactNode } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { PIPE_QUERY } from "./pipeQuery";
+import { trackRegistry, trackStore } from "./trackStore";
+import type { TrackId } from "@/content/types";
 
 /**
  * TUNING: every number that controls how the desktop pipeline *feels*.
@@ -58,12 +60,16 @@ const CONFETTI = ["#ff8c00", "#00bfff", "#00ff41", "#f0f0f0", "#ff8c00", "#00bff
   (color, i) => ({ color, dx: Math.round(Math.cos((i / 10) * Math.PI * 2 - 1.2) * 70), dy: Math.round(Math.sin((i / 10) * Math.PI * 2 - 1.2) * 60) - 20 }),
 );
 
-export default function Pipeline({ track, label, children }: { track: string; label: string; children: ReactNode }) {
+export default function Pipeline({ track, label, children }: { track: TrackId; label: string; children: ReactNode }) {
+  // Only the visible track builds its pinned timeline; the others are display:none (see globals.css).
+  const visible = useSyncExternalStore(trackStore.subscribe, () => trackStore.get().visible, () => trackStore.getServer().visible);
+  const active = visible === track;
   const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const charRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (!active) return;
     gsap.registerPlugin(ScrollTrigger);
     const section = sectionRef.current!;
     const trackEl = trackRef.current!;
@@ -97,6 +103,7 @@ export default function Pipeline({ track, label, children }: { track: string; la
       const tl = gsap.timeline({
         defaults: { ease: "none" },
         scrollTrigger: {
+          id: track, // lets other code find this trigger: ScrollTrigger.getById("projects")
           trigger: section,
           start: () => `top top+=${hudH()}`, // pin just under the HUD
           end: () => `+=${total * unitsToPx()}`, // stay pinned this many px of scrolling
@@ -259,6 +266,12 @@ export default function Pipeline({ track, label, children }: { track: string; la
       const onSectionScroll = () => {
         if (section.scrollLeft !== 0) section.scrollLeft = 0;
       };
+      trackRegistry[track] = {
+        goTo: (slug) => {
+          const panel = panels.find((p) => p.dataset.slug === slug);
+          if (panel) goTo(panel);
+        },
+      };
       document.addEventListener("click", onClick);
       trackEl.addEventListener("focusin", onFocus);
       section.addEventListener("scroll", onSectionScroll);
@@ -273,7 +286,16 @@ export default function Pipeline({ track, label, children }: { track: string; la
         goTo(hashPanel);
       }
 
+      // The pin changes the page height, so everything below (About, Contact) must re-measure.
+      requestAnimationFrame(() => {
+        ScrollTrigger.refresh();
+        ScrollTrigger.update();
+        // re-evaluate the character state for wherever the page is scrolled now
+        setTimeout(() => tl.eventCallback("onUpdate")?.call(tl), 120);
+      });
+
       return () => {
+        delete trackRegistry[track];
         document.removeEventListener("click", onClick);
         trackEl.removeEventListener("focusin", onFocus);
         section.removeEventListener("scroll", onSectionScroll);
@@ -291,7 +313,8 @@ export default function Pipeline({ track, label, children }: { track: string; la
     });
 
     return () => mm.revert();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active]);
 
   return (
     <section

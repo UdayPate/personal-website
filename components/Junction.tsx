@@ -1,5 +1,6 @@
 import { trackMeta } from "@/content/site";
 import type { TrackId } from "@/content/types";
+import JunctionButtons from "./JunctionButtons";
 
 // The branch point after the short intake belt. Placeholder art: a control box with
 // three signal lights. In static mode (no JS / reduced motion) the three entries are
@@ -10,7 +11,8 @@ export default function Junction({ counts }: { counts: Record<TrackId, number> }
       <div className="border-4 border-orange bg-background p-4 shadow-[6px_6px_0_0_var(--orange)] sm:p-6">
         <p className="font-pixel text-xs text-green">JUNCTION</p>
         <h2 className="mt-2 font-pixel text-sm leading-relaxed text-orange sm:text-base">CHOOSE YOUR TRACK</h2>
-        <ul className="mt-4 grid gap-3 sm:grid-cols-3">
+        <JunctionButtons counts={counts} />
+        <ul className="only-static mt-4 grid gap-3 sm:grid-cols-3">
           {trackMeta.map((t) => (
             <li key={t.id}>
               <a

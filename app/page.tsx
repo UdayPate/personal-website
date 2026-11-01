@@ -4,6 +4,7 @@ import TrackSection from "@/components/TrackSection";
 import Signpost from "@/components/Signpost";
 import Junction from "@/components/Junction";
 import Merge from "@/components/Merge";
+import TrackController from "@/components/TrackController";
 import type { TrackId } from "@/content/types";
 import { profile } from "@/content/profile";
 import Station from "@/components/Station";
@@ -26,6 +27,7 @@ export default function Home() {
   return (
     <main className="w-full flex-1 pb-16">
       <ScrollProgress />
+      <TrackController />
       <section className="px-4 py-8 text-center sm:py-12 pipe:flex pipe:min-h-[calc(100svh-var(--hud-h))] pipe:flex-col pipe:justify-center pipe:py-6">
         <h1 className="font-pixel text-2xl leading-relaxed text-orange sm:text-4xl pipe:text-5xl">
           {profile.name.toUpperCase()}
@@ -54,7 +56,8 @@ export default function Home() {
       <div aria-hidden className="belt-strip" />
       <Junction counts={counts} />
 
-      {/* Stacked order (no JS / reduced motion): Projects, Experience, Education */}
+      {/* Stacked order (no JS / reduced motion): Projects, Experience, Education. With JS, only the chosen track is shown. */}
+      <div id="tracks" data-active="projects">
       {(["projects", "experience", "education"] as const).map((t) => (
         <TrackSection key={t} track={t}>
           {tracks[t].map((st) => (
@@ -63,6 +66,7 @@ export default function Home() {
           <Signpost track={t} />
         </TrackSection>
       ))}
+      </div>
       <Merge />
       <ScrollMemory />
 

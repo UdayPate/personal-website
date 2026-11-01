@@ -50,6 +50,15 @@ body {
   html.js .only-select { display: block; }
 }
 
+/* select mode: show only the chosen track (the junction / SWITCH TRACK set #tracks[data-active]) */
+@media (prefers-reduced-motion: no-preference) {
+  html.js #tracks[data-active="projects"] > [data-track-section]:not([data-track-section="projects"]),
+  html.js #tracks[data-active="experience"] > [data-track-section]:not([data-track-section="experience"]),
+  html.js #tracks[data-active="education"] > [data-track-section]:not([data-track-section="education"]) {
+    display: none;
+  }
+}
+
 /* Original factory conveyor: steel rail with a tread pattern. */
 .belt {
   position: absolute;
@@ -272,4 +281,12 @@ body {
 .signal-dot[data-on="true"] {
   background: var(--green);
   box-shadow: 0 0 8px var(--green);
+}
+
+/* short hop when the character is moved to another track's start */
+.char-hop { animation: char-hop 0.45s ease-out 1; }
+@keyframes char-hop {
+  0% { translate: 0 0; }
+  40% { translate: 0 -36px; }
+  100% { translate: 0 0; }
 }
