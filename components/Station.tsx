@@ -19,8 +19,18 @@ export default function Station({ station }: { station: TrackStation }) {
   const hudFull = track === "projects" ? `${trackLabel} ${position}/${total} · ${stageLabel!.toUpperCase()}` : `${trackLabel} ${position}/${total}`;
   const hudShort = `${trackLabel} ${position}/${total}`;
   const eyebrow = track === "projects" ? `STAGE ${position}/${totalStages} · ${stageLabel!.toUpperCase()}` : undefined;
-  // placeholder props by position along the track (hopper, gears, database, dashboard, terminal)
-  const propIndex = total <= 1 ? 0 : Math.round(((position - 1) * 4) / (total - 1));
+  // Prop art by theme (all in public/sprites):
+  //  - projects: the ETL machines by position (hopper, gears, database, dashboard, terminal)
+  //  - education ("training lab"): by content kind, so a new file gets art automatically
+  //  - experience ("office floor"): desk, filing cabinet, whiteboard, rotating by order
+  const edu = track === "education" ? getEducation(slug)! : null;
+  const propSheet = track === "education" ? "edu" : track === "experience" ? "office" : "etl";
+  const propIndex =
+    track === "education"
+      ? edu!.kind === "degree" ? 0 : edu!.kind === "certificate" ? 1 : edu!.kind === "award" ? 2 : edu!.status === "in-progress" ? 3 : 4
+      : track === "experience"
+        ? (position - 1) % 3
+        : total <= 1 ? 0 : Math.round(((position - 1) * 4) / (total - 1));
 
   return (
     <section
@@ -37,7 +47,7 @@ export default function Station({ station }: { station: TrackStation }) {
       {track === "experience" && <CheckpointCard checkpoint={getCheckpoint(slug)!} compact headingLevel={3} />}
       {track === "education" && <EducationCard item={getEducation(slug)!} compact headingLevel={3} />}
       {/* Decorative machine on the belt (public/sprites/props.png). Right of where the character stops, so it never overlaps it or the card. */}
-      <div aria-hidden className="station-prop absolute bottom-16 left-[76%] hidden pipe:block" style={{ ["--i" as string]: propIndex }} />
+      <div aria-hidden data-sheet={propSheet} className="station-prop absolute bottom-16 left-[76%] hidden pipe:block" style={{ ["--i" as string]: propIndex }} />
       {last && (
         // The laptop the character picks up at the last station of every track (see Pipeline.tsx).
         <div aria-hidden data-laptop className="laptop-prop absolute bottom-16 left-[57%] hidden pipe:block" />

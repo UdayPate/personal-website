@@ -212,6 +212,13 @@ body {
   image-rendering: pixelated;
   pointer-events: none;
 }
+.station-prop[data-sheet="edu"] {
+  background-image: url(/sprites/props-edu.png);
+}
+.station-prop[data-sheet="office"] {
+  background-image: url(/sprites/props-office.png);
+  background-size: calc(48px * var(--s)) calc(16px * var(--s));
+}
 @media (min-height: 760px) and (min-width: 1200px) {
   .station-prop {
     --s: 3;
@@ -404,4 +411,18 @@ body {
   0% { translate: 0 0; }
   40% { translate: 0 -36px; }
   100% { translate: 0 0; }
+}
+
+/* A faint floor pattern per track, so you can tell where you are at a glance. Cards are opaque, so reading contrast is unchanged. */
+[data-pipeline="education"] {
+  /* training lab: graph paper */
+  background-image:
+    linear-gradient(rgba(0, 191, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 191, 255, 0.05) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+[data-pipeline="experience"] {
+  /* office floor: carpet tiles */
+  background-image: repeating-conic-gradient(rgba(255, 140, 0, 0.045) 0 25%, transparent 0 50%);
+  background-size: 64px 64px;
 }
