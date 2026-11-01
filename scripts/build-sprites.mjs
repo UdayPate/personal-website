@@ -315,4 +315,21 @@ const sheets = STAGES.map((s) => {
   hl.forEach((img, i) => { for (let y = 0; y < 16; y++) img.buf.copy(hb, (y * 16 * hl.length + i * 16) * 4, y * 16 * 4, (y + 1) * 16 * 4); });
   writeFileSync(new URL("hero.png", OUT), png(16 * hl.length, 16, hb));
 }
+// ---------- brand images: favicon, Apple touch icon, and the sprite for the social preview ----------
+{
+  const s4 = sheets[3];
+  const frame = s4.idle[0]; // final sprite, standing (rows of letters)
+  const face = frame.slice(2, 22).map((r) => r.slice(9, 29).join("")); // 20 x 20: hair, glasses, beard
+  const bg = "#0a0a0f";
+  const onDark = (grid, scale, size, outlineColor) => {
+    const img = renderGrid(grid, PALETTE, scale, outlineColor);
+    const x0 = Math.floor((size - img.w) / 2), y0 = Math.floor((size - img.h) / 2);
+    return composite([{ img, x0, y0 }], size, size, bg);
+  };
+  mkdirSync(new URL("../assets/social/", import.meta.url), { recursive: true });
+  writeFileSync(new URL("../app/icon.png", import.meta.url), onDark(face, 2, 48, s4.s.outline)); // 22 x 22 -> 44px on 48
+  writeFileSync(new URL("../app/apple-icon.png", import.meta.url), onDark(face, 8, 180, s4.s.outline)); // 176px on 180
+  const full = renderGrid(frame.map((r) => r.join("")), PALETTE, 10, s4.s.outline);
+  writeFileSync(new URL("../assets/social/sprite.png", import.meta.url), png(full.w, full.h, full.buf));
+}
 console.log("sprites written to public/sprites and art/preview");
