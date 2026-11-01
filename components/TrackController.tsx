@@ -63,6 +63,14 @@ export default function TrackController() {
     };
     document.addEventListener("click", onClick);
 
+    // The visitor edits the #hash in the address bar (a same-page navigation).
+    const onHashChange = () => {
+      const id = hashTarget();
+      if (id && trackIdsSet.has(id)) chooseTrack(id as TrackId, { instant: window.scrollY > trackStartY(trackStore.get().visible) + 300 });
+      else if (id && stationTrack(id)) goToStation(id, stationTrack(id)!);
+    };
+    window.addEventListener("hashchange", onHashChange);
+
     // Scrolling past the junction without choosing picks the default track.
     let raf = 0;
     const onScroll = () => {
@@ -83,6 +91,7 @@ export default function TrackController() {
     return () => {
       unsub();
       document.removeEventListener("click", onClick);
+      window.removeEventListener("hashchange", onHashChange);
       window.removeEventListener("scroll", onScroll);
       cancelAnimationFrame(raf);
     };

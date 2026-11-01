@@ -72,6 +72,9 @@ export type EducationItem = {
   institution: string;
   /** Free text ("2025", "expected Dec 2027"). Only an in-progress item may omit it. */
   dates?: string;
+  /** One line shown on the card (used by award cards). */
+  summary?: string;
+  /** "CODE: Full name" (cards show only the code, with the full name as a tooltip). */
   courses?: string[];
   /** File in public/ (png, jpg, webp, svg or pdf), e.g. "/certificates/codepath.pdf". */
   certificate?: string;

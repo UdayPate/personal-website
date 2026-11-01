@@ -5,6 +5,7 @@ title: "UC Berkeley x DeepMind Hackathon"
 institution: "UC Berkeley x DeepMind"
 dates: "Sept 2026"
 award: "5th place"
+summary: "Gemini-powered move-in/move-out inspections that flag damage and estimate repairs."
 project: "Deposit Shield"
 role: "Engineer: owned data processing and data storage"
 teamSize: 4

@@ -236,7 +236,7 @@ function loadProfile(counts: { projectCount: number; experienceCount: number }):
 }
 
 const EDUCATION_KINDS = ["degree", "certificate", "award", "course"] as const;
-const EDUCATION_FIELDS = ["kind", "order", "title", "institution", "dates", "courses", "certificate", "status", "award", "project", "role", "teamSize", "tech", "links"];
+const EDUCATION_FIELDS = ["kind", "order", "title", "institution", "dates", "summary", "courses", "certificate", "status", "award", "project", "role", "teamSize", "tech", "links"];
 const CERTIFICATE_TYPES = [".png", ".jpg", ".jpeg", ".webp", ".svg", ".pdf"];
 
 function loadEducation(): Loaded<EducationItem>[] {
@@ -253,6 +253,7 @@ function loadEducation(): Loaded<EducationItem>[] {
     const order = intField(file, data, "order", 1, true);
     const title = str(file, data, "title", true);
     const institution = str(file, data, "institution", true);
+    const summary = str(file, data, "summary", false);
     const award = str(file, data, "award", false);
     const project = str(file, data, "project", false);
     const role = str(file, data, "role", false);
@@ -287,7 +288,7 @@ function loadEducation(): Loaded<EducationItem>[] {
 
     const links = parseLinks(file, data);
     if (errors.length > before) return [];
-    return [{ file, item: { track: "education", slug, kind: kind!, order: order!, title: title!, institution: institution!, dates, courses, certificate, status, award, project, role, teamSize, tech, links, details: body } }];
+    return [{ file, item: { track: "education", slug, kind: kind!, order: order!, title: title!, institution: institution!, dates, summary, courses, certificate, status, award, project, role, teamSize, tech, links, details: body } }];
   });
 }
 

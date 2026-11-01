@@ -1,8 +1,11 @@
 import Link from "next/link";
 import type { EducationItem } from "@/content/types";
+import IconTip from "./IconTip";
 
 export const KIND_LABEL = { degree: "DEGREE", certificate: "CERTIFICATE", award: "AWARD", course: "COURSE" } as const;
 const MAX_COURSES = 4;
+/** "CSE 101: Introduction to ..." -> "CSE 101" (the whole text if there is no colon) */
+const courseCode = (c: string) => (c.includes(":") ? c.slice(0, c.indexOf(":")).trim() : c);
 
 // Placeholder pixel trophy (8x8). The real award badge art arrives in a later step.
 const TROPHY = ["XXXXXXXX", "XXXXXXXX", ".XXXXXX.", "..XXXX..", "...XX...", "...XX...", "..XXXX..", ".XXXXXX."];
@@ -30,9 +33,13 @@ export default function EducationCard({
   headingLevel?: 2 | 3;
 }) {
   const Heading = headingLevel === 2 ? "h2" : "h3";
-  const { slug, kind, title, institution, dates, courses, certificate, status, award } = item;
+  const { slug, kind, title, institution, dates, summary, courses, certificate, status, award, project, role, teamSize, tech, links } = item;
   const shown = courses?.slice(0, MAX_COURSES) ?? [];
   const more = (courses?.length ?? 0) - shown.length;
+  // Award cards lead with the project; the event name appears once, under the title, with the date.
+  const lead = kind === "award" && project ? project : title;
+  const sub = kind === "award" && project ? [title, dates].filter(Boolean).join(" · ") : null;
+  const roleLine = [role, teamSize ? `team of ${teamSize}` : null].filter(Boolean).join(" · ");
   return (
     <article
       className={`border-4 border-green bg-background p-4 shadow-[6px_6px_0_0_var(--green)] sm:p-6 ${
@@ -49,25 +56,45 @@ export default function EducationCard({
       <Heading
         className={`mt-2 font-pixel text-sm leading-relaxed text-orange sm:text-base ${compact ? "pipe:text-sm" : ""}`}
       >
-        {title}
+        {lead}
       </Heading>
-      <p className={`text-foreground ${compact ? "pipe:text-[1.3rem] pipe:leading-[1.15]" : ""}`}>{institution}</p>
-      {dates && <p className="text-foreground/80">{dates}</p>}
+      {sub ? (
+        <p className={`text-foreground ${compact ? "pipe:text-[1.3rem] pipe:leading-[1.15]" : ""}`}>{sub}</p>
+      ) : (
+        <>
+          <p className={`text-foreground ${compact ? "pipe:text-[1.3rem] pipe:leading-[1.15]" : ""}`}>{institution}</p>
+          {dates && <p className="text-foreground/80">{dates}</p>}
+        </>
+      )}
       {award && (
         <p className="mt-3 inline-flex items-center gap-2 border-2 border-orange px-2 py-1 font-pixel text-xs text-orange">
           <Trophy />
           {award.toUpperCase()}
         </p>
       )}
+      {summary && <p className={`mt-3 text-foreground ${compact ? "pipe:text-[1.3rem] pipe:leading-[1.15]" : ""}`}>{summary}</p>}
+      {roleLine && <p className={`mt-1 text-foreground/80 ${compact ? "pipe:text-[1.3rem] pipe:leading-[1.15]" : ""}`}>{roleLine}</p>}
+      {tech && tech.length > 0 && (
+        <ul className="mt-3 flex flex-wrap gap-2" aria-label="Tech stack">
+          {tech.map((t) => (
+            <li key={t} className="border-2 border-green px-2 text-lg text-green">
+              {t}
+            </li>
+          ))}
+        </ul>
+      )}
       {shown.length > 0 && (
         <ul className="mt-3 flex flex-wrap gap-2" aria-label="Courses">
           {shown.map((c) => (
-            <li key={c} className={`border-2 border-cyan px-2 text-lg text-cyan ${compact ? "pipe:text-base pipe:leading-[1.15]" : ""}`}>
-              {c}
+            <li key={c}>
+              {/* the code is the tag; the full name is the tooltip (hover, focus, tap) and the accessible name */}
+              <IconTip text={c} align="left">
+                <span className="block border-2 border-cyan px-2 text-lg text-cyan">{courseCode(c)}</span>
+              </IconTip>
             </li>
           ))}
           {more > 0 && (
-            <li className="border-2 border-foreground/50 px-2 text-lg text-foreground/80 pipe:text-base">+{more} more</li>
+            <li className="border-2 border-foreground/50 px-2 text-lg text-foreground/80">+{more} more</li>
           )}
         </ul>
       )}
@@ -77,13 +104,23 @@ export default function EducationCard({
             href={certificate}
             target="_blank"
             rel="noopener noreferrer"
-            aria-label={`View certificate: ${title} (opens in a new tab)`}
+            aria-label={`View certificate: ${lead} (opens in a new tab)`}
             className={btn}
           >
             VIEW CERTIFICATE
           </a>
         )}
-        <Link href={`/education/${slug}`} aria-label={`View details: ${title}`} className={btn}>
+        {links?.github && (
+          <a href={links.github} target="_blank" rel="noopener noreferrer" aria-label={`GitHub: ${lead} (opens in a new tab)`} className={btn}>
+            GITHUB
+          </a>
+        )}
+        {links?.demo && (
+          <a href={links.demo} target="_blank" rel="noopener noreferrer" aria-label={`Demo: ${lead} (opens in a new tab)`} className={btn}>
+            DEMO
+          </a>
+        )}
+        <Link href={`/education/${slug}`} aria-label={`View details: ${lead}`} className={btn}>
           VIEW DETAILS
         </Link>
       </div>
