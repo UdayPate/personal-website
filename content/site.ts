@@ -1,6 +1,9 @@
 // Things about the site and the game (not about Uday: that lives in content/profile.md,
 // content/projects and content/experience).
 
+/** Where the site lives. Used for link previews (Open Graph), sitemap.xml and robots.txt. Change it when a custom domain is added. */
+export const siteUrl = "https://uday-patel-tau.vercel.app";
+
 export const totalStages = 5;
 
 /** Names of the five stages, in order. Which project sits at each stage is set by `pipelineStage` in content/projects/*.md. */

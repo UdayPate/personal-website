@@ -12,7 +12,9 @@ export async function generateMetadata({ params }: PageProps<"/experience/[id]">
   const { id } = await params;
   const item = getCheckpoint(id);
   if (!item) return {};
-  return { title: `${item.title} | Udayverse`, description: item.bullets[0] };
+  const title = `${item.title} | Udayverse`;
+  const description = item.bullets[0];
+  return { title, description, openGraph: { title, description } };
 }
 
 export default async function ExperiencePage({ params }: PageProps<"/experience/[id]">) {

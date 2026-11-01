@@ -4,6 +4,7 @@ import Hud from "@/components/Hud";
 import NavTracker from "@/components/NavTracker";
 import SkipLink from "@/components/SkipLink";
 import { profile } from "@/content/profile";
+import { siteUrl } from "@/content/site";
 import "./globals.css";
 
 // next/font downloads these fonts at build time and serves them from our own
@@ -21,8 +22,12 @@ const body = VT323({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: profile.pageTitle,
   description: profile.metaDescription,
+  // The preview image comes from app/opengraph-image.tsx and app/twitter-image.tsx
+  openGraph: { title: profile.pageTitle, description: profile.metaDescription, url: "/", siteName: "Udayverse", type: "website", locale: "en_US" },
+  twitter: { card: "summary_large_image", title: profile.pageTitle, description: profile.metaDescription },
 };
 
 // viewport-fit=cover lets env(safe-area-inset-*) report the iPhone home-indicator inset.

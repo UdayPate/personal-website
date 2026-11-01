@@ -15,10 +15,9 @@ export async function generateMetadata({ params }: PageProps<"/projects/[id]">):
   const { id } = await params;
   const project = getProject(id);
   if (!project) return {};
-  return {
-    title: `${project.title} | Udayverse`,
-    description: project.problem ?? project.summary[0],
-  };
+  const title = `${project.title} | Udayverse`;
+  const description = project.problem ?? project.summary[0];
+  return { title, description, openGraph: { title, description } };
 }
 
 export default async function ProjectPage({ params }: PageProps<"/projects/[id]">) {

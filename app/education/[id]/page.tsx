@@ -16,7 +16,9 @@ export async function generateMetadata({ params }: PageProps<"/education/[id]">)
   const { id } = await params;
   const item = getEducation(id);
   if (!item) return {};
-  return { title: `${item.title} | Udayverse`, description: `${item.title}, ${item.institution}${item.dates ? ` (${item.dates})` : ""}` };
+  const title = `${item.title} | Udayverse`;
+  const description = `${item.title}, ${item.institution}${item.dates ? ` (${item.dates})` : ""}`;
+  return { title, description, openGraph: { title, description } };
 }
 
 export default async function EducationPage({ params }: PageProps<"/education/[id]">) {

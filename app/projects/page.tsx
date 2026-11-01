@@ -7,9 +7,11 @@ import ProjectCard from "@/components/ProjectCard";
 import CheckpointCard from "@/components/CheckpointCard";
 import EducationCard from "@/components/EducationCard";
 
+const description = `All projects and experience from ${profile.name}: data engineering, analytics, ML and software.`;
 export const metadata: Metadata = {
   title: "Projects | Udayverse",
-  description: `All projects and experience from ${profile.name}: data engineering, analytics, ML and software.`,
+  description,
+  openGraph: { title: "Projects | Udayverse", description, url: "/projects" },
 };
 
 export default function ProjectsPage() {
