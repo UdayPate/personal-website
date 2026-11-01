@@ -1,16 +1,22 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
 import { hudStore } from "./hudStore";
+import { trackStore } from "./trackStore";
 
-// Live stage label + DATA QUALITY bar. Only the home page scrolls through the
-// pipeline, so other pages show the finished (static) values.
-export default function HudLive() {
+// Live stage label + DATA QUALITY bar.
+//  - the label follows the station on screen (home page only; other pages show "ALL TRACKS")
+//  - DATA QUALITY = distinct stations visited across all three tracks / all stations, remembered
+//    for the visit (see trackStore), so other pages show the same value
+export default function HudLive({ totalStations }: { totalStations: number }) {
   const pathname = usePathname();
   const live = useSyncExternalStore(hudStore.subscribe, hudStore.get, hudStore.get);
-  const { stage, short, quality } =
-    pathname === "/" ? live : { stage: "ALL TRACKS", short: "ALL TRACKS", quality: 100 };
+  const visited = useSyncExternalStore(trackStore.subscribe, () => trackStore.get().visited.length, () => 0);
+  useEffect(() => trackStore.hydrate(), []);
+
+  const quality = Math.min(100, Math.round((visited / totalStations) * 100));
+  const { stage, short } = pathname === "/" ? live : { stage: "ALL TRACKS", short: "ALL TRACKS" };
 
   return (
     <>
@@ -29,7 +35,7 @@ export default function HudLive() {
           aria-valuenow={quality}
           aria-valuemin={0}
           aria-valuemax={100}
-          aria-valuetext={`${quality}% — ${stage}`}
+          aria-valuetext={`${quality}% (${visited} of ${totalStations} stations visited), ${stage}`}
           className="h-3 min-w-[4rem] flex-1 border-2 border-green"
         >
           <div className="h-full bg-green" style={{ width: `${quality}%` }} />

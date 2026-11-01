@@ -77,6 +77,21 @@ export const hudIcons = {
     "............",
     "............",
   ],
+  // a belt that forks into three tracks (SWITCH TRACK)
+  track: [
+    "............",
+    "............",
+    "........XXXX",
+    "......XX....",
+    "....XX......",
+    "XXXXXXXXXXXX",
+    "....XX......",
+    "......XX....",
+    "........XXXX",
+    "............",
+    "............",
+    "............",
+  ],
 } as const;
 
 export const sourceIcons = {

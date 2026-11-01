@@ -1,5 +1,10 @@
+"use client";
+
+import { useSyncExternalStore } from "react";
 import { trackMeta } from "@/content/site";
 import type { TrackId } from "@/content/types";
+import Check from "./Check";
+import { trackStore } from "./trackStore";
 
 const link =
   "inline-flex min-h-11 items-center gap-2 border-2 border-cyan px-3 font-pixel text-xs text-cyan hover:bg-cyan hover:text-background lg:min-h-9 lg:pointer-coarse:min-h-11";
@@ -7,6 +12,7 @@ const link =
 // The last panel of every track: points to the other tracks, or on to LOAD COMPLETE.
 export default function Signpost({ track }: { track: TrackId }) {
   const me = trackMeta.find((t) => t.id === track)!;
+  const visited = useSyncExternalStore(trackStore.subscribe, () => trackStore.get().tracksVisited.join(","), () => "").split(",");
   return (
     <section
       id={`${track}-end`}
@@ -26,6 +32,14 @@ export default function Signpost({ track }: { track: TrackId }) {
               <li key={t.id}>
                 <a href={`#${t.id}`} data-track-link={t.id} className={link}>
                   {t.label}
+                  {visited.includes(t.id) && (
+                    <>
+                      <span aria-hidden className="text-green">
+                        <Check />
+                      </span>
+                      <span className="sr-only">(visited)</span>
+                    </>
+                  )}
                 </a>
               </li>
             ))}

@@ -221,6 +221,7 @@ export default function Pipeline({ track, label, children }: { track: TrackId; l
         for (let i = 0; i < n; i++) if (t >= arriveAt(i) && t <= leaveAt(i)) idx = i;
         if (idx !== windowIdx) {
           windowIdx = idx;
+          if (idx >= 0 && panels[idx].dataset.slug) trackStore.visit(panels[idx].dataset.slug!, track); // the character reached this station
           clearTimeout(celebrateTimer);
           char.dataset.confetti = "0";
           if (idx < 0) setAnim("walk");

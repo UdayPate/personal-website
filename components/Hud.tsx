@@ -1,5 +1,7 @@
 import { profile } from "@/content/profile";
 import HudLive from "./HudLive";
+import SwitchTrack from "./SwitchTrack";
+import { totalStations } from "@/content/tracks";
 import HudName from "./HudName";
 import PixelIcon from "./PixelIcon";
 import type { hudIcons } from "@/art/icons";
@@ -33,11 +35,12 @@ export default function Hud() {
         <HudName name={profile.name} />
         {/* On desktop the HUD is two rows: name + links on top, stage label + DATA QUALITY below. */}
         <span aria-hidden className="hidden lg:order-4 lg:block lg:basis-full" />
-        <HudLive />
+        <HudLive totalStations={totalStations} />
         <nav
           aria-label="Quick links"
           className="fixed inset-x-0 bottom-0 z-50 flex gap-2 border-t-4 border-orange bg-background px-[max(0.5rem,env(safe-area-inset-left))] pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 lg:static lg:inset-auto lg:order-3 lg:ml-auto lg:border-0 lg:bg-transparent lg:p-0"
         >
+          <SwitchTrack />
           <a
             className={btn}
             href={profile.resume}
