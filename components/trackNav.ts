@@ -36,12 +36,16 @@ export function setHash(hash: string) {
  * Pick a track and go to its start. `delay` lets the junction animation play first.
  * `instant` jumps instead of scrolling smoothly (used when switching from far down a track).
  */
-export async function chooseTrack(track: TrackId, opts: { delay?: number; instant?: boolean; scroll?: boolean } = {}) {
-  const { delay = 0, instant = false, scroll = true } = opts;
+export async function chooseTrack(track: TrackId, opts: { delay?: number; instant?: boolean; scroll?: boolean; cancel?: Promise<unknown> } = {}) {
+  const { delay = 0, instant = false, scroll = true, cancel } = opts;
   trackStore.select(track);
   setHash(track);
   if (!scroll) return;
-  if (delay) await new Promise((r) => setTimeout(r, delay));
+  if (delay) {
+    // `cancel` resolves when the visitor scrolls on their own: then we do not scroll for them.
+    const cancelled = await Promise.race([new Promise<false>((r) => setTimeout(() => r(false), delay)), cancel ? cancel.then(() => true) : new Promise<false>(() => {})]);
+    if (cancelled) return;
+  }
   await ready(track);
   const y = Math.max(0, Math.round(trackStartY(track)));
   window.scrollTo({ top: y, behavior: instant ? "auto" : "smooth" });

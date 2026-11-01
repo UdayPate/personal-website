@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { trackMeta } from "@/content/site";
 import type { TrackId } from "@/content/types";
 import Check from "./Check";
+import Light, { lightFor } from "./Light";
 import PixelIcon from "./PixelIcon";
 import { chooseTrack, trackStartY } from "./trackNav";
 import { trackStore } from "./trackStore";
@@ -68,7 +69,7 @@ export default function SwitchTrack() {
         </span>
         <span aria-hidden className="hidden items-center gap-1 sm:flex">
           {trackMeta.map((t) => (
-            <span key={t.id} className="signal-dot !h-3 !w-3" data-on={current === t.id} />
+            <Light key={t.id} state={lightFor(t.id, current)} scale={1} />
           ))}
         </span>
       </button>
@@ -84,7 +85,7 @@ export default function SwitchTrack() {
               "flex min-h-11 w-full items-center gap-3 border-2 border-transparent px-2 text-left font-pixel text-xs text-cyan hover:border-cyan aria-[current=true]:text-green";
             const inner = (
               <>
-                <span aria-hidden className="signal-dot" data-on={on} />
+                <Light state={lightFor(t.id, selected)} scale={2} />
                 <span className="flex-1">{t.label}</span>
                 {visited && (
                   <>

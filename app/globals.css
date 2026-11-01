@@ -271,16 +271,85 @@ body {
     repeating-linear-gradient(90deg, transparent 0 22px, rgba(255, 140, 0, 0.35) 22px 26px),
     linear-gradient(#1a1a22, #111118);
 }
-.signal-dot {
+/* signal lights (public/sprites/lights.png: red, yellow, green; each 8x8) */
+.light {
+  --s: 2;
   display: inline-block;
-  width: 14px;
-  height: 14px;
-  border: 2px solid var(--foreground);
-  background: #ff3b3b;
+  flex: none;
+  width: calc(8px * var(--s));
+  height: calc(8px * var(--s));
+  background: url(/sprites/lights.png) no-repeat calc(var(--l) * -8px * var(--s)) 0 / calc(24px * var(--s)) calc(8px * var(--s));
+  image-rendering: pixelated;
 }
-.signal-dot[data-on="true"] {
-  background: var(--green);
-  box-shadow: 0 0 8px var(--green);
+
+/* the riveted control-box frame (public/sprites/panel.png, 24x24, 8px border) */
+.panel-frame {
+  --ps: 2;
+  border: calc(8px * var(--ps)) solid transparent;
+  border-image: url(/sprites/panel.png) 8 / calc(8px * var(--ps)) stretch;
+  image-rendering: pixelated;
+}
+@media (min-width: 1024px) {
+  .panel-frame { --ps: 3; }
+}
+
+/* lever (lever.png: 7 poses of 24x24) and its dust puff (dust.png: 4 frames of 12x12) */
+.lever {
+  --s: 5;
+  position: absolute;
+  inset: 0;
+  width: calc(24px * var(--s));
+  height: calc(24px * var(--s));
+  background: url(/sprites/lever.png) no-repeat calc(var(--f) * -24px * var(--s)) 0 / calc(168px * var(--s)) calc(24px * var(--s));
+  image-rendering: pixelated;
+}
+.dust {
+  --s: 5;
+  position: absolute;
+  left: calc(6px * var(--s));
+  top: calc(14px * var(--s));
+  width: calc(12px * var(--s));
+  height: calc(12px * var(--s));
+  background: url(/sprites/dust.png) no-repeat 0 0 / calc(48px * var(--s)) calc(12px * var(--s));
+  image-rendering: pixelated;
+  animation: dust-puff 0.34s steps(4) 1 forwards;
+}
+@keyframes dust-puff {
+  to { background-position-x: calc(-48px * var(--s)); }
+}
+
+/* rails: one belt splits into three (rails.png 192x80), with the switch carriage (carriage.png 14x12) on its guide */
+.rails {
+  --rs: 4;
+  width: calc(192px * var(--rs));
+  height: calc(80px * var(--rs));
+  background: url(/sprites/rails.png) no-repeat 0 0 / 100% 100%;
+  image-rendering: pixelated;
+}
+/* the intake belt continues to the left edge of the screen, level with the middle rail */
+.belt-stub {
+  position: absolute;
+  right: 100%;
+  top: calc(35px * var(--rs));
+  width: 100vw;
+  height: calc(10px * var(--rs));
+  background:
+    linear-gradient(#ff8c00 0 calc(2px * var(--rs)), #b35f00 calc(2px * var(--rs)) calc(4px * var(--rs)), transparent calc(4px * var(--rs))),
+    linear-gradient(to top, #12131a 0 calc(1px * var(--rs)), #1b1d27 calc(1px * var(--rs)) calc(2px * var(--rs)), transparent calc(2px * var(--rs))),
+    repeating-linear-gradient(90deg, #111118 0 calc(2px * var(--rs)), #1a1a22 calc(2px * var(--rs)) calc(8px * var(--rs)));
+}
+.carriage {
+  position: absolute;
+  left: calc(114px * var(--rs));
+  top: calc((var(--ry) - 6) * 1px * var(--rs));
+  width: calc(14px * var(--rs));
+  height: calc(12px * var(--rs));
+  background: url(/sprites/carriage.png) 0 0 / 100% 100% no-repeat;
+  image-rendering: pixelated;
+  transition: top 0.3s steps(6, end);
+}
+@media (prefers-reduced-motion: reduce) {
+  .carriage { transition: none; }
 }
 
 /* short hop when the character is moved to another track's start */
