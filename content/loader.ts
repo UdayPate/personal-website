@@ -5,13 +5,13 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { parse as parseYaml } from "yaml";
 import { stageLabels, totalStages } from "./site";
-import type { Checkpoint, EducationItem, EducationKind, PipelineItem, Profile, Project, ProjectLinks } from "./types";
+import type { Checkpoint, EducationItem, EducationKind, PipelineItem, Profile, Project, ProjectLinks, TrackId, TrackStation } from "./types";
 
 const CONTENT = path.join(process.cwd(), "content");
 const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 const LINK_KEYS = ["github", "demo", "screenshots"] as const;
 const PROJECT_KEYS = ["title", "dates", "problem", "pipelineStage", "projectsOnly", "summary", "tech", "highlight", "links"];
-const CHECKPOINT_KEYS = ["title", "dates", "afterStage", "bullets"];
+const CHECKPOINT_KEYS = ["title", "dates", "order", "afterStage", "bullets"];
 const PROFILE_KEYS = ["name", "firstName", "pitch", "subtitle", "email", "linkedin", "github", "resume", "pageTitle", "metaDescription", "tooltips"];
 const TOOLTIP_KEYS = ["grad", "laptop", "cricket"] as const;
 const PROFILE_FILE = "content/profile.md";
@@ -166,9 +166,10 @@ function loadCheckpoints(): Loaded<Checkpoint>[] {
     const title = str(file, data, "title", true);
     const dates = str(file, data, "dates", true);
     const bullets = strList(file, data, "bullets");
+    const order = intField(file, data, "order", 1, true);
     const afterStage = stageNumber(file, data, "afterStage", 1, totalStages - 1, true);
     if (errors.length > before) return [];
-    return [{ file, item: { track: "experience", slug, title: title!, dates: dates!, bullets: bullets!, afterStage: afterStage!, details: body } }];
+    return [{ file, item: { track: "experience", slug, title: title!, dates: dates!, bullets: bullets!, order: order!, afterStage: afterStage!, details: body } }];
   });
 }
 
@@ -319,6 +320,13 @@ function build() {
     else byOrder.set(item.order, file);
   }
 
+  const expOrder = new Map<number, string>();
+  for (const { file, item } of c) {
+    const other = expOrder.get(item.order);
+    if (other) fail(file, `"order: ${item.order}" is already used by ${other}; every experience file needs its own order number`);
+    else expOrder.set(item.order, file);
+  }
+
   const profile = loadProfile({ projectCount: p.length, experienceCount: c.length });
 
   if (errors.length) {
@@ -335,7 +343,14 @@ function build() {
     for (const cp of checkpoints) if (cp.afterStage === s) pipeline.push({ kind: "checkpoint", label: "Checkpoint", slug: cp.slug });
   }
   const education = e.map((x) => x.item).sort((a, b) => a.order - b.order);
-  return { profile: profile!, projects, checkpoints, education, pipeline };
+  const experience = [...checkpoints].sort((a, b) => a.order - b.order);
+  const station = (track: TrackId, slugs: string[]): TrackStation[] => slugs.map((slug, i) => ({ track, slug, position: i + 1, total: slugs.length }));
+  const tracks: Record<TrackId, TrackStation[]> = {
+    projects: pipeline.filter((x) => x.kind === "stage").map((x, i, all) => ({ track: "projects" as const, slug: x.slug, position: i + 1, total: all.length, stageLabel: x.label })),
+    experience: station("experience", experience.map((x) => x.slug)),
+    education: station("education", education.map((x) => x.slug)),
+  };
+  return { profile: profile!, projects, checkpoints, experience, education, pipeline, tracks };
 }
 
 export const content = build();

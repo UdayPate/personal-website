@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { checkpoints, projects } from "@/content/projects";
+import { education } from "@/content/education";
 import { profile } from "@/content/profile";
 import ProjectCard from "@/components/ProjectCard";
 import CheckpointCard from "@/components/CheckpointCard";
+import EducationCard from "@/components/EducationCard";
 
 export const metadata: Metadata = {
   title: "Projects | Udayverse",
@@ -30,6 +32,13 @@ export default function ProjectsPage() {
       <div className="mt-4 space-y-8">
         {checkpoints.map((c) => (
           <CheckpointCard key={c.slug} checkpoint={c} />
+        ))}
+      </div>
+
+      <h2 className="mt-12 font-pixel text-sm text-green">EDUCATION</h2>
+      <div className="mt-4 space-y-8">
+        {education.map((e) => (
+          <EducationCard key={e.slug} item={e} />
         ))}
       </div>
     </main>

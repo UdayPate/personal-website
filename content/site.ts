@@ -12,3 +12,10 @@ export const heroIcons = [
   { id: "laptop", color: "#7fe9ff" },
   { id: "cricket", color: "#e8c27a" },
 ] as const;
+
+/** The three tracks as shown at the junction (left to right) and in the HUD. */
+export const trackMeta = [
+  { id: "education", label: "EDUCATION", heading: "Education" },
+  { id: "experience", label: "EXPERIENCE", heading: "Experience" },
+  { id: "projects", label: "PROJECTS", heading: "Projects" },
+] as const;

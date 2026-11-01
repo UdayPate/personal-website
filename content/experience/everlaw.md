@@ -1,6 +1,7 @@
 ---
 title: "Everlaw, GTM Data Analyst Intern"
 dates: "Jun–Aug 2026"
+order: 2
 afterStage: 3
 bullets:
   - "Shipped a first-of-its-kind post-sales benchmarking dashboard across ~1,000 accounts; validated with stakeholders and moved to staging for company-wide rollout"

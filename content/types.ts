@@ -29,8 +29,25 @@ export type Project = {
   projectsOnly?: boolean;
 };
 
+export type TrackId = "projects" | "experience" | "education";
+
+/** One station on a track, in order. */
+export type TrackStation = {
+  track: TrackId;
+  /** The slug of the project / experience / education file. */
+  slug: string;
+  /** 1-based position on its track. */
+  position: number;
+  /** How many stations the track has. */
+  total: number;
+  /** Projects track only: Extract, Transform, ... */
+  stageLabel?: string;
+};
+
 export type Checkpoint = {
   track: "experience";
+  /** Position on the Experience track (1 = first). Unique; sorted by this, never by date. */
+  order: number;
   /** Taken from the file name (content/experience/<slug>.md). */
   slug: string;
   title: string;

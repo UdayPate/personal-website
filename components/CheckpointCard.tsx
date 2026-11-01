@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Checkpoint } from "@/content/projects";
 
 export default function CheckpointCard({
@@ -32,6 +33,13 @@ export default function CheckpointCard({
           </li>
         ))}
       </ul>
+      <Link
+        href={`/experience/${checkpoint.slug}`}
+        aria-label={`View details: ${checkpoint.title}`}
+        className="mt-4 inline-flex min-h-11 items-center border-2 border-orange px-3 font-pixel text-xs text-orange hover:bg-orange hover:text-background lg:min-h-9 lg:pointer-coarse:min-h-11"
+      >
+        VIEW DETAILS
+      </Link>
     </article>
   );
 }

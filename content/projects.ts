@@ -6,6 +6,8 @@ export type { Checkpoint, PipelineItem, Project, ProjectLinks } from "./types";
 
 export const { projects, checkpoints, pipeline } = content;
 
+export type { EducationItem } from "./types";
+
 export function getProject(slug: string) {
   return projects.find((p) => p.slug === slug);
 }
