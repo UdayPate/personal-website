@@ -7,13 +7,6 @@ email: "pateluday0308@gmail.com"
 linkedin: "https://www.linkedin.com/in/upatelda/"
 github: "https://github.com/UdayPate"
 resume: "/resume.pdf"
-education:
-  - degree: "MS, Applied Data Intelligence"
-    school: "San José State University"
-    dates: "graduating Dec 2027"
-  - degree: "BS, Computer Science"
-    school: "UC Santa Cruz"
-    dates: "2025"
 pageTitle: "Uday Patel | Udayverse"
 metaDescription: "Engineer by training, product thinker by habit. I build systems that people actually use."
 tooltips:

@@ -5,15 +5,14 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { parse as parseYaml } from "yaml";
 import { stageLabels, totalStages } from "./site";
-import type { Checkpoint, Education, PipelineItem, Profile, Project, ProjectLinks } from "./types";
+import type { Checkpoint, EducationItem, EducationKind, PipelineItem, Profile, Project, ProjectLinks } from "./types";
 
 const CONTENT = path.join(process.cwd(), "content");
 const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 const LINK_KEYS = ["github", "demo", "screenshots"] as const;
 const PROJECT_KEYS = ["title", "dates", "problem", "pipelineStage", "projectsOnly", "summary", "tech", "highlight", "links"];
 const CHECKPOINT_KEYS = ["title", "dates", "afterStage", "bullets"];
-const PROFILE_KEYS = ["name", "firstName", "pitch", "subtitle", "email", "linkedin", "github", "resume", "education", "pageTitle", "metaDescription", "tooltips"];
-const EDUCATION_KEYS = ["degree", "school", "dates"];
+const PROFILE_KEYS = ["name", "firstName", "pitch", "subtitle", "email", "linkedin", "github", "resume", "pageTitle", "metaDescription", "tooltips"];
 const TOOLTIP_KEYS = ["grad", "laptop", "cricket"] as const;
 const PROFILE_FILE = "content/profile.md";
 
@@ -104,6 +103,34 @@ function checkSlug(file: string, slug: string) {
   if (!SLUG.test(slug)) fail(file, `file name must be lowercase letters, digits and dashes, like "my-project.md"`);
 }
 
+function intField(file: string, data: Record<string, unknown>, key: string, min: number, required: boolean): number | undefined {
+  const v = data[key];
+  if (v === undefined) {
+    if (required) fail(file, `missing required field "${key}"`);
+    return undefined;
+  }
+  if (typeof v !== "number" || !Number.isInteger(v) || v < min) {
+    fail(file, `"${key}" must be a whole number of ${min} or more (got ${describe(v)})`);
+    return undefined;
+  }
+  return v;
+}
+function parseLinks(file: string, data: Record<string, unknown>): ProjectLinks | undefined {
+  if (data.links === undefined) return undefined;
+  const l = data.links as Record<string, unknown>;
+  if (l === null || typeof l !== "object" || Array.isArray(l)) {
+    fail(file, `"links" must be a group like "github: https://..." (got ${describe(l)})`);
+    return undefined;
+  }
+  const links: ProjectLinks = {};
+  for (const k of Object.keys(l)) {
+    if (!(LINK_KEYS as readonly string[]).includes(k)) fail(file, `unknown link "${k}" (allowed: ${LINK_KEYS.join(", ")})`);
+    else if (typeof l[k] !== "string" || !/^https?:\/\/\S+$/.test(l[k] as string)) fail(file, `link "${k}" must be a full web address starting with http:// or https:// (got ${describe(l[k])})`);
+    else links[k as keyof ProjectLinks] = l[k] as string;
+  }
+  return links;
+}
+
 function loadProjects(): Loaded<Project>[] {
   return readEntries("projects").flatMap(({ file, slug, data, body }) => {
     const before = errors.length;
@@ -124,22 +151,10 @@ function loadProjects(): Loaded<Project>[] {
     }
     if (data.pipelineStage === undefined && !projectsOnly) fail(file, `needs either "pipelineStage: 1-${totalStages}" or "projectsOnly: true"`);
     if (data.pipelineStage !== undefined && data.projectsOnly !== undefined) fail(file, `"pipelineStage" and "projectsOnly" cannot both be set`);
-    let links: ProjectLinks | undefined;
-    if (data.links !== undefined) {
-      const l = data.links as Record<string, unknown>;
-      if (l === null || typeof l !== "object" || Array.isArray(l)) fail(file, `"links" must be a group like "github: https://..." (got ${describe(l)})`);
-      else {
-        links = {};
-        for (const k of Object.keys(l)) {
-          if (!(LINK_KEYS as readonly string[]).includes(k)) fail(file, `unknown link "${k}" (allowed: ${LINK_KEYS.join(", ")})`);
-          else if (typeof l[k] !== "string" || !/^https?:\/\/\S+$/.test(l[k] as string)) fail(file, `link "${k}" must be a full web address starting with http:// or https:// (got ${describe(l[k])})`);
-          else links[k as keyof ProjectLinks] = l[k] as string;
-        }
-      }
-    }
+    const links = parseLinks(file, data);
     if (!body) fail(file, "the Markdown body (the full details, below the frontmatter) is empty");
     if (errors.length > before) return [];
-    return [{ file, item: { slug, title: title!, dates, problem, summary: summary!, details: body, tech: tech!, highlight, links, pipelineStage, projectsOnly } }];
+    return [{ file, item: { track: "projects", slug, title: title!, dates, problem, summary: summary!, details: body, tech: tech!, highlight, links, pipelineStage, projectsOnly } }];
   });
 }
 
@@ -153,7 +168,7 @@ function loadCheckpoints(): Loaded<Checkpoint>[] {
     const bullets = strList(file, data, "bullets");
     const afterStage = stageNumber(file, data, "afterStage", 1, totalStages - 1, true);
     if (errors.length > before) return [];
-    return [{ file, item: { slug, title: title!, dates: dates!, bullets: bullets!, afterStage: afterStage!, details: body } }];
+    return [{ file, item: { track: "experience", slug, title: title!, dates: dates!, bullets: bullets!, afterStage: afterStage!, details: body } }];
   });
 }
 
@@ -191,24 +206,6 @@ function loadProfile(counts: { projectCount: number; experienceCount: number }):
     fail(file, `"resume" must be a path to a file in public/, like "/resume.pdf" (nothing found at public${resume})`);
   }
 
-  let education: Education[] | undefined;
-  const ed = data.education;
-  if (ed === undefined) fail(file, `missing required field "education"`);
-  else if (!Array.isArray(ed) || ed.length === 0) fail(file, `"education" must be a list with at least one entry (got ${describe(ed)})`);
-  else {
-    education = [];
-    ed.forEach((e, i) => {
-      const where = `education entry ${i + 1}`;
-      if (e === null || typeof e !== "object" || Array.isArray(e)) return fail(file, `${where} must have "degree" and "school" (got ${describe(e)})`);
-      const o = e as Record<string, unknown>;
-      for (const k of Object.keys(o)) if (!EDUCATION_KEYS.includes(k)) fail(file, `${where}: unknown field "${k}" (allowed: ${EDUCATION_KEYS.join(", ")})`);
-      const degree = str(`${file} (${where})`, o, "degree", true);
-      const school = str(`${file} (${where})`, o, "school", true);
-      const dates = str(`${file} (${where})`, o, "dates", false);
-      if (degree && school) education!.push({ degree, school, dates });
-    });
-  }
-
   // hero icon tooltips; {projectCount} and {experienceCount} are filled in from the content files
   let tooltips: Profile["tooltips"] | undefined;
   const tt = data.tooltips;
@@ -233,20 +230,77 @@ function loadProfile(counts: { projectCount: number; experienceCount: number }):
   if (errors.length > before) return undefined;
   return {
     name: name!, firstName: firstName!, pitch: pitch!, subtitle: subtitle!, email: email!,
-    linkedin: urls.linkedin!, github: urls.github!, resume: resume!, education: education!,
+    linkedin: urls.linkedin!, github: urls.github!, resume: resume!,
     pageTitle: pageTitle!, metaDescription: metaDescription!, tooltips: tooltips!, about: body,
   };
+}
+
+const EDUCATION_KINDS = ["degree", "certificate", "award", "course"] as const;
+const EDUCATION_FIELDS = ["kind", "order", "title", "institution", "dates", "courses", "certificate", "status", "award", "project", "role", "teamSize", "tech", "links"];
+const CERTIFICATE_TYPES = [".png", ".jpg", ".jpeg", ".webp", ".svg", ".pdf"];
+
+function loadEducation(): Loaded<EducationItem>[] {
+  return readEntries("education").flatMap(({ file, slug, data, body }) => {
+    const before = errors.length;
+    checkSlug(file, slug);
+    unknownKeys(file, data, EDUCATION_FIELDS);
+
+    let kind: EducationKind | undefined;
+    if (data.kind === undefined) fail(file, `missing required field "kind"`);
+    else if (!(EDUCATION_KINDS as readonly string[]).includes(data.kind as string)) fail(file, `"kind" must be one of ${EDUCATION_KINDS.join(", ")} (got ${describe(data.kind)})`);
+    else kind = data.kind as EducationKind;
+
+    const order = intField(file, data, "order", 1, true);
+    const title = str(file, data, "title", true);
+    const institution = str(file, data, "institution", true);
+    const award = str(file, data, "award", false);
+    const project = str(file, data, "project", false);
+    const role = str(file, data, "role", false);
+    const teamSize = intField(file, data, "teamSize", 1, false);
+
+    let status: "in-progress" | undefined;
+    if (data.status !== undefined) {
+      if (data.status !== "in-progress") fail(file, `"status" must be "in-progress" (or leave it out) (got ${describe(data.status)})`);
+      else status = "in-progress";
+    }
+    const dates = str(file, data, "dates", false);
+    if (dates === undefined && data.dates === undefined && status !== "in-progress") fail(file, `missing required field "dates" (only status: in-progress may leave it out)`);
+
+    let courses: string[] | undefined;
+    if (data.courses !== undefined) courses = strList(file, data, "courses");
+    let tech: string[] | undefined;
+    if (data.tech !== undefined) tech = strList(file, data, "tech");
+
+    let certificate: string | undefined;
+    if (data.certificate !== undefined) {
+      const c = str(file, data, "certificate", false);
+      if (c !== undefined) {
+        const ext = path.extname(c).toLowerCase();
+        if (!c.startsWith("/") || !CERTIFICATE_TYPES.includes(ext)) fail(file, `"certificate" must be a path in public/ ending in ${CERTIFICATE_TYPES.join(", ")}, like "/certificates/name.pdf" (got ${JSON.stringify(c)})`);
+        else if (!existsSync(path.join(process.cwd(), "public", c))) fail(file, `"certificate" points to a file that does not exist: public${c}`);
+        else certificate = c;
+      }
+    }
+
+    if (kind === "award" && data.award === undefined) fail(file, `kind "award" needs an "award" line, like award: "5th place"`);
+    if (kind !== "award" && data.award !== undefined) fail(file, `"award" is only allowed when kind is "award" (this one is "${data.kind}")`);
+
+    const links = parseLinks(file, data);
+    if (errors.length > before) return [];
+    return [{ file, item: { track: "education", slug, kind: kind!, order: order!, title: title!, institution: institution!, dates, courses, certificate, status, award, project, role, teamSize, tech, links, details: body } }];
+  });
 }
 
 function build() {
   const p = loadProjects();
   const c = loadCheckpoints();
+  const e = loadEducation();
 
   // slugs are used as page ids and anchors, so they must be unique across both folders
   const seen = new Map<string, string>();
-  for (const { file, item } of [...p, ...c]) {
+  for (const { file, item } of [...p, ...c, ...e]) {
     const other = seen.get(item.slug);
-    if (other) fail(file, `same name as ${other}; every project and experience file needs a different file name`);
+    if (other) fail(file, `same name as ${other}; every project, experience and education file needs a different file name`);
     else seen.set(item.slug, file);
   }
 
@@ -255,6 +309,14 @@ function build() {
     const files = claimed.get(s) ?? [];
     if (files.length === 0) errors.push(`No project has "pipelineStage: ${s}". Every stage from 1 to ${totalStages} needs exactly one project.`);
     if (files.length > 1) errors.push(`Stage ${s} is claimed by more than one project: ${files.join(" and ")}. Each stage needs exactly one project.`);
+  }
+
+  // education stations: sorted by the explicit "order" number; no two may share one
+  const byOrder = new Map<number, string>();
+  for (const { file, item } of e) {
+    const other = byOrder.get(item.order);
+    if (other) fail(file, `"order: ${item.order}" is already used by ${other}; every education file needs its own order number`);
+    else byOrder.set(item.order, file);
   }
 
   const profile = loadProfile({ projectCount: p.length, experienceCount: c.length });
@@ -272,7 +334,8 @@ function build() {
     pipeline.push({ kind: "stage", stage: s, label: stageLabels[s - 1], slug: projects.find((x) => x.pipelineStage === s)!.slug });
     for (const cp of checkpoints) if (cp.afterStage === s) pipeline.push({ kind: "checkpoint", label: "Checkpoint", slug: cp.slug });
   }
-  return { profile: profile!, projects, checkpoints, pipeline };
+  const education = e.map((x) => x.item).sort((a, b) => a.order - b.order);
+  return { profile: profile!, projects, checkpoints, education, pipeline };
 }
 
 export const content = build();

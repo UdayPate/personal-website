@@ -7,7 +7,10 @@ export type ProjectLinks = {
   screenshots?: string;
 };
 
+export type Track = "projects" | "experience" | "education";
+
 export type Project = {
+  track: "projects";
   /** Taken from the file name (content/projects/<slug>.md). */
   slug: string;
   title: string;
@@ -27,6 +30,7 @@ export type Project = {
 };
 
 export type Checkpoint = {
+  track: "experience";
   /** Taken from the file name (content/experience/<slug>.md). */
   slug: string;
   title: string;
@@ -47,10 +51,34 @@ export type PipelineItem = {
   slug: string;
 };
 
-export type Education = {
-  degree: string;
-  school: string;
+export type EducationKind = "degree" | "certificate" | "award" | "course";
+
+/** One station on the Education track (content/education/<slug>.md). */
+export type EducationItem = {
+  track: "education";
+  /** Taken from the file name. */
+  slug: string;
+  kind: EducationKind;
+  /** Position on the track (1 = first). Unique; stations are sorted by this, never by date. */
+  order: number;
+  title: string;
+  /** School, issuer or event organizer. */
+  institution: string;
+  /** Free text ("2025", "expected Dec 2027"). Only an in-progress item may omit it. */
   dates?: string;
+  courses?: string[];
+  /** File in public/ (png, jpg, webp, svg or pdf), e.g. "/certificates/codepath.pdf". */
+  certificate?: string;
+  status?: "in-progress";
+  /** Required for kind "award", e.g. "5th place". */
+  award?: string;
+  project?: string;
+  role?: string;
+  teamSize?: number;
+  tech?: string[];
+  links?: ProjectLinks;
+  /** The Markdown body (optional details). */
+  details: string;
 };
 
 /** Everything about Uday, from content/profile.md. */
@@ -65,7 +93,6 @@ export type Profile = {
   github: string;
   /** Path under public/, e.g. "/resume.pdf". */
   resume: string;
-  education: Education[];
   /** The browser tab title and search-result description of the home page. */
   pageTitle: string;
   metaDescription: string;
