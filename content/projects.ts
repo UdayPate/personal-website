@@ -2,9 +2,9 @@
 // content/projects/ and content/experience/ (see content/loader.ts). Server-only.
 import { content } from "./loader";
 
-export type { Checkpoint, PipelineItem, Project, ProjectLinks } from "./types";
+export type { Checkpoint, Project, ProjectLinks } from "./types";
 
-export const { projects, checkpoints, pipeline } = content;
+export const { projects, checkpoints } = content;
 
 export type { EducationItem } from "./types";
 

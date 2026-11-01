@@ -58,7 +58,7 @@ const CONFETTI = ["#ff8c00", "#00bfff", "#00ff41", "#f0f0f0", "#ff8c00", "#00bff
   (color, i) => ({ color, dx: Math.round(Math.cos((i / 10) * Math.PI * 2 - 1.2) * 70), dy: Math.round(Math.sin((i / 10) * Math.PI * 2 - 1.2) * 60) - 20 }),
 );
 
-export default function Pipeline({ children }: { children: ReactNode }) {
+export default function Pipeline({ track, label, children }: { track: string; label: string; children: ReactNode }) {
   const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const charRef = useRef<HTMLDivElement>(null);
@@ -66,7 +66,7 @@ export default function Pipeline({ children }: { children: ReactNode }) {
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
     const section = sectionRef.current!;
-    const track = trackRef.current!;
+    const trackEl = trackRef.current!;
     const char = charRef.current!;
     const hud = document.querySelector<HTMLElement>("[data-hud]");
     const hudH = () => hud?.offsetHeight ?? 56;
@@ -80,11 +80,11 @@ export default function Pipeline({ children }: { children: ReactNode }) {
       section.style.overflow = "hidden";
 
       const T = TUNING;
-      const panels = Array.from(track.querySelectorAll<HTMLElement>("[data-station]"));
+      const panels = Array.from(trackEl.querySelectorAll<HTMLElement>("[data-panel]"));
       const n = panels.length;
       const W = () => section.clientWidth; // visible width
       // Camera position (track offset) that shows panel i exactly.
-      const cam = (i: number) => Math.min(panels[i].offsetLeft, track.offsetWidth - W());
+      const cam = (i: number) => Math.min(panels[i].offsetLeft, trackEl.offsetWidth - W());
       const size = () => char.offsetWidth;
 
       // Timeline layout, in units. Station i's block is: dwell, then hop to i+1.
@@ -109,7 +109,7 @@ export default function Pipeline({ children }: { children: ReactNode }) {
 
       // Starting looks. Set here, when GSAP runs, so without JS everything is
       // fully visible. (Reverted automatically by mm.revert().)
-      const cards = panels.map((p) => p.querySelector<HTMLElement>(":scope > article"));
+      const cards = panels.map((p) => p.querySelector<HTMLElement>(":scope > article, :scope > aside"));
       const flags = panels.map((p) => p.querySelector<HTMLElement>("[data-flag-cloth]"));
       cards.forEach((c) => c && gsap.set(c, REST));
       flags.forEach((f) => f && gsap.set(f, FLAG_DIM));
@@ -150,7 +150,7 @@ export default function Pipeline({ children }: { children: ReactNode }) {
           tl.fromTo(card, POPPED, { ...REST, duration: T.settleDuration, ease: "power2.in", ...no }, leaveAt(i));
         }
         tl.fromTo(
-          track,
+          trackEl,
           { x: () => -cam(i) },
           { x: () => -cam(i + 1), duration: T.hop, ...no },
           leaveAt(i),
@@ -260,7 +260,7 @@ export default function Pipeline({ children }: { children: ReactNode }) {
         if (section.scrollLeft !== 0) section.scrollLeft = 0;
       };
       document.addEventListener("click", onClick);
-      track.addEventListener("focusin", onFocus);
+      trackEl.addEventListener("focusin", onFocus);
       section.addEventListener("scroll", onSectionScroll);
 
       // Arriving at /#station (e.g. from a project page's back link).
@@ -275,7 +275,7 @@ export default function Pipeline({ children }: { children: ReactNode }) {
 
       return () => {
         document.removeEventListener("click", onClick);
-        track.removeEventListener("focusin", onFocus);
+        trackEl.removeEventListener("focusin", onFocus);
         section.removeEventListener("scroll", onSectionScroll);
         ScrollTrigger.removeEventListener("refreshInit", setHudVar);
         char.removeEventListener("animationend", onAnimEnd);
@@ -295,9 +295,9 @@ export default function Pipeline({ children }: { children: ReactNode }) {
 
   return (
     <section
-      id="pipeline"
+      data-pipeline={track}
       ref={sectionRef}
-      aria-label="Pipeline"
+      aria-label={`${label} track`}
       className="pipe:h-[calc(100svh-var(--hud-h))] pipe:overflow-x-auto pipe:overflow-y-hidden"
     >
       <div ref={trackRef} className="pipe:relative pipe:flex pipe:h-full pipe:w-max">

@@ -1,8 +1,12 @@
 import Link from "next/link";
-import { pipeline } from "@/content/projects";
+import { tracks } from "@/content/tracks";
+import TrackSection from "@/components/TrackSection";
+import Signpost from "@/components/Signpost";
+import Junction from "@/components/Junction";
+import Merge from "@/components/Merge";
+import type { TrackId } from "@/content/types";
 import { profile } from "@/content/profile";
 import Station from "@/components/Station";
-import Pipeline from "@/components/Pipeline";
 import IntroArt from "@/components/IntroArt";
 import ScrollProgress from "@/components/ScrollProgress";
 import ScrollMemory from "@/components/ScrollMemory";
@@ -15,6 +19,8 @@ const contactLinks = [
   { label: "GITHUB", icon: "github", href: profile.github, aria: "GitHub profile (opens in a new tab)", external: true },
   { label: "RESUME", icon: "resume", href: profile.resume, aria: "Resume (PDF, opens in a new tab)", external: true },
 ] as const;
+
+const counts = Object.fromEntries(Object.entries(tracks).map(([k, v]) => [k, v.length])) as Record<TrackId, number>;
 
 export default function Home() {
   return (
@@ -45,14 +51,22 @@ export default function Home() {
         <IntroArt tooltips={profile.tooltips} firstName={profile.firstName} />
       </section>
 
-      <Pipeline>
-        {pipeline.map((item) => (
-          <Station key={item.slug} item={item} />
-        ))}
-      </Pipeline>
+      <div aria-hidden className="belt-strip" />
+      <Junction counts={counts} />
+
+      {/* Stacked order (no JS / reduced motion): Projects, Experience, Education */}
+      {(["projects", "experience", "education"] as const).map((t) => (
+        <TrackSection key={t} track={t}>
+          {tracks[t].map((st) => (
+            <Station key={st.slug} station={st} />
+          ))}
+          <Signpost track={t} />
+        </TrackSection>
+      ))}
+      <Merge />
       <ScrollMemory />
 
-      <section id="about" className="mx-auto max-w-5xl scroll-mt-28 px-4 py-10">
+      <section id="about" data-station="COMPLETE" data-station-short="COMPLETE" className="mx-auto max-w-5xl scroll-mt-28 px-4 py-10">
         <div className="grid items-center gap-8 lg:grid-cols-[3fr_2fr] lg:gap-12">
           <div>
             <p className="font-pixel text-xs text-green">LOAD COMPLETE</p>
@@ -69,7 +83,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="contact" className="mx-auto max-w-5xl scroll-mt-28 px-4 py-6 pb-10">
+      <section id="contact" data-station="COMPLETE" data-station-short="COMPLETE" className="mx-auto max-w-5xl scroll-mt-28 px-4 py-6 pb-10">
         <div className="grid items-center gap-6 border-t-4 border-orange/60 pt-8 lg:grid-cols-[3fr_2fr] lg:gap-12">
           <div>
             <h2 className="font-pixel text-base text-orange">CONTACT</h2>

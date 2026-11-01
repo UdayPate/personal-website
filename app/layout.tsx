@@ -30,7 +30,11 @@ export const viewport: Viewport = { viewportFit: "cover", themeColor: "#0a0a0f" 
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${pixel.variable} ${body.variable} h-full`}>
+    <html lang="en" className={`${pixel.variable} ${body.variable} h-full`} suppressHydrationWarning>
+      <head>
+        {/* Marks that JavaScript is running, before first paint. The CSS uses it to choose between the static and the branching layouts. */}
+        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
+      </head>
       <body className="flex min-h-full flex-col pb-[calc(4.5rem+env(safe-area-inset-bottom))] lg:pb-0">
         <SkipLink />
         <Hud />

@@ -28,10 +28,26 @@ body {
 
 /* Desktop pipeline layout: panels side by side. Applied by CSS alone so the
    first paint already matches; GSAP only adds pinning and motion. */
-@custom-variant pipe (@media (min-width: 1024px) and (min-height: 600px) and (prefers-reduced-motion: no-preference));
+@custom-variant pipe {
+  @media (min-width: 1024px) and (min-height: 600px) and (prefers-reduced-motion: no-preference) {
+    /* `js` is added to <html> by a tiny script in layout.tsx, so without JS nothing is pinned or hidden */
+    &:where(.js *) {
+      @slot;
+    }
+  }
+}
 
 :root {
   --hud-h: 3.5rem;
+}
+
+/* Three display modes for the branching pipeline (see components/TrackArea.tsx):
+   - static (no JS, or reduced motion): all three tracks are shown one after another and the junction is a list of links;
+   - select (JS + motion allowed): one track at a time, chosen with the junction buttons or SWITCH TRACK. */
+.only-select { display: none; }
+@media (prefers-reduced-motion: no-preference) {
+  html.js .only-static { display: none; }
+  html.js .only-select { display: block; }
 }
 
 /* Original factory conveyor: steel rail with a tread pattern. */
@@ -236,4 +252,24 @@ body {
   width: 6px;
   height: 6px;
   opacity: 0;
+}
+
+/* Placeholder art for the junction / intake / merge (real art comes in a later step) */
+.belt-strip {
+  height: 3rem;
+  border-top: 6px solid var(--orange);
+  background:
+    repeating-linear-gradient(90deg, transparent 0 22px, rgba(255, 140, 0, 0.35) 22px 26px),
+    linear-gradient(#1a1a22, #111118);
+}
+.signal-dot {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--foreground);
+  background: #ff3b3b;
+}
+.signal-dot[data-on="true"] {
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
 }

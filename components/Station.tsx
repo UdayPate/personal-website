@@ -1,37 +1,49 @@
-import { totalStages } from "@/content/site";
-import { getCheckpoint, getProject, type PipelineItem } from "@/content/projects";
+import { getCheckpoint, getProject } from "@/content/projects";
+import { getEducation } from "@/content/education";
+import { totalStages, trackMeta } from "@/content/site";
+import type { TrackStation } from "@/content/types";
 import ProjectCard from "./ProjectCard";
 import CheckpointCard from "./CheckpointCard";
+import EducationCard from "./EducationCard";
 
-export default function Station({ item }: { item: PipelineItem }) {
-  const project = item.kind === "stage" ? getProject(item.slug) : undefined;
-  const checkpoint = item.kind === "checkpoint" ? getCheckpoint(item.slug) : undefined;
-  const eyebrow =
-    item.kind === "stage" ? `STAGE ${item.stage}/${totalStages} · ${item.label.toUpperCase()}` : undefined;
-  // What the live HUD shows while this station is on screen.
-  const hudLabel = item.kind === "stage" ? eyebrow : "CHECKPOINT";
+/** Character art stage (1 blob, 2 8-bit, 3 16-bit, 4 final) for a station: spread across the track, final at the last one. */
+export function artStageFor(position: number, total: number) {
+  return total <= 1 ? 4 : 1 + Math.round(((position - 1) * 3) / (total - 1));
+}
+
+export default function Station({ station }: { station: TrackStation }) {
+  const { track, slug, position, total, stageLabel } = station;
+  const trackLabel = trackMeta.find((t) => t.id === track)!.label;
+  const last = position === total;
+  // Labels the live HUD shows while this station is on screen (long, and short for phones).
+  const hudFull = track === "projects" ? `${trackLabel} ${position}/${total} · ${stageLabel!.toUpperCase()}` : `${trackLabel} ${position}/${total}`;
+  const hudShort = `${trackLabel} ${position}/${total}`;
+  const eyebrow = track === "projects" ? `STAGE ${position}/${totalStages} · ${stageLabel!.toUpperCase()}` : undefined;
+  // placeholder props by position along the track (hopper, gears, database, dashboard, terminal)
+  const propIndex = total <= 1 ? 0 : Math.round(((position - 1) * 4) / (total - 1));
 
   return (
     <section
-      id={item.slug}
-      data-station={hudLabel}
-      data-art-stage={item.kind === "stage" ? Math.min(item.stage ?? 1, 4) : undefined}
+      id={slug}
+      data-panel
+      data-station={hudFull}
+      data-station-short={hudShort}
+      data-track={track}
+      data-slug={slug}
+      data-art-stage={artStageFor(position, total)}
       className="mx-auto w-full max-w-3xl scroll-mt-28 border-l-8 border-orange/60 py-8 pl-4 pr-4 sm:pl-8 pipe:relative pipe:flex pipe:h-full pipe:w-screen pipe:shrink-0 pipe:items-center pipe:justify-center pipe:mx-0 pipe:max-w-none pipe:border-l-0 pipe:px-[6vw] pipe:pb-[5.5rem] pipe:pt-0"
     >
-      {project && <ProjectCard project={project} eyebrow={eyebrow} compact headingLevel={2} />}
-      {checkpoint && <CheckpointCard checkpoint={checkpoint} compact headingLevel={2} />}
-      {item.kind === "stage" && (
-        // Decorative machine on the belt for this stage (public/sprites/props.png).
-        // Sits right of where the character stops, so it never overlaps it or the card.
-        <div aria-hidden className="station-prop absolute bottom-16 left-[76%] hidden pipe:block" style={{ ["--i" as string]: (item.stage ?? 1) - 1 }} />
-      )}
-      {item.slug === "data-lens" && (
-        // The laptop the character picks up when it arrives at Serve (see Pipeline.tsx).
+      {track === "projects" && <ProjectCard project={getProject(slug)!} eyebrow={eyebrow} compact headingLevel={3} />}
+      {track === "experience" && <CheckpointCard checkpoint={getCheckpoint(slug)!} compact headingLevel={3} />}
+      {track === "education" && <EducationCard item={getEducation(slug)!} compact headingLevel={3} />}
+      {/* Decorative machine on the belt (public/sprites/props.png). Right of where the character stops, so it never overlaps it or the card. */}
+      <div aria-hidden className="station-prop absolute bottom-16 left-[76%] hidden pipe:block" style={{ ["--i" as string]: propIndex }} />
+      {last && (
+        // The laptop the character picks up at the last station of every track (see Pipeline.tsx).
         <div aria-hidden data-laptop className="laptop-prop absolute bottom-16 left-[57%] hidden pipe:block" />
       )}
-      {checkpoint && (
-        // Checkpoint marker on the belt: Pipeline.tsx raises and lights the flag
-        // as the character passes. Shown lit by default (no JS / static layouts hide it).
+      {track === "experience" && (
+        // Checkpoint marker on the belt: Pipeline.tsx raises and lights the flag as the character passes.
         <div aria-hidden className="absolute bottom-16 left-[68%] hidden pipe:block">
           <div className="h-24 w-1 bg-foreground/60" />
           <div data-flag-cloth className="absolute left-1 top-0 h-6 w-10 bg-green" />

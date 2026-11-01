@@ -31,10 +31,12 @@ export default function Hud() {
     >
       <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-4 gap-y-1">
         <HudName name={profile.name} />
+        {/* On desktop the HUD is two rows: name + links on top, stage label + DATA QUALITY below. */}
+        <span aria-hidden className="hidden lg:order-4 lg:block lg:basis-full" />
         <HudLive />
         <nav
           aria-label="Quick links"
-          className="fixed inset-x-0 bottom-0 z-50 flex gap-2 border-t-4 border-orange bg-background px-[max(0.5rem,env(safe-area-inset-left))] pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 lg:static lg:inset-auto lg:border-0 lg:bg-transparent lg:p-0"
+          className="fixed inset-x-0 bottom-0 z-50 flex gap-2 border-t-4 border-orange bg-background px-[max(0.5rem,env(safe-area-inset-left))] pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 lg:static lg:inset-auto lg:order-3 lg:ml-auto lg:border-0 lg:bg-transparent lg:p-0"
         >
           <a
             className={btn}

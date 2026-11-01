@@ -5,13 +5,13 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { parse as parseYaml } from "yaml";
 import { stageLabels, totalStages } from "./site";
-import type { Checkpoint, EducationItem, EducationKind, PipelineItem, Profile, Project, ProjectLinks, TrackId, TrackStation } from "./types";
+import type { Checkpoint, EducationItem, EducationKind, Profile, Project, ProjectLinks, TrackId, TrackStation } from "./types";
 
 const CONTENT = path.join(process.cwd(), "content");
 const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 const LINK_KEYS = ["github", "demo", "screenshots"] as const;
 const PROJECT_KEYS = ["title", "dates", "problem", "pipelineStage", "projectsOnly", "summary", "tech", "highlight", "links"];
-const CHECKPOINT_KEYS = ["title", "dates", "order", "afterStage", "bullets"];
+const CHECKPOINT_KEYS = ["title", "dates", "order", "bullets"];
 const PROFILE_KEYS = ["name", "firstName", "pitch", "subtitle", "email", "linkedin", "github", "resume", "pageTitle", "metaDescription", "tooltips"];
 const TOOLTIP_KEYS = ["grad", "laptop", "cricket"] as const;
 const PROFILE_FILE = "content/profile.md";
@@ -167,9 +167,8 @@ function loadCheckpoints(): Loaded<Checkpoint>[] {
     const dates = str(file, data, "dates", true);
     const bullets = strList(file, data, "bullets");
     const order = intField(file, data, "order", 1, true);
-    const afterStage = stageNumber(file, data, "afterStage", 1, totalStages - 1, true);
     if (errors.length > before) return [];
-    return [{ file, item: { track: "experience", slug, title: title!, dates: dates!, bullets: bullets!, order: order!, afterStage: afterStage!, details: body } }];
+    return [{ file, item: { track: "experience", slug, title: title!, dates: dates!, bullets: bullets!, order: order!, details: body } }];
   });
 }
 
@@ -335,22 +334,18 @@ function build() {
 
   // /projects order: pipeline projects by stage, then projects-only ones by file name
   const projects = [...p].sort((a, b) => (a.item.pipelineStage ?? 99) - (b.item.pipelineStage ?? 99) || a.file.localeCompare(b.file)).map((x) => x.item);
-  const checkpoints = [...c].sort((a, b) => a.item.afterStage - b.item.afterStage || a.file.localeCompare(b.file)).map((x) => x.item);
-
-  const pipeline: PipelineItem[] = [];
-  for (let s = 1; s <= totalStages; s++) {
-    pipeline.push({ kind: "stage", stage: s, label: stageLabels[s - 1], slug: projects.find((x) => x.pipelineStage === s)!.slug });
-    for (const cp of checkpoints) if (cp.afterStage === s) pipeline.push({ kind: "checkpoint", label: "Checkpoint", slug: cp.slug });
-  }
+  const checkpoints = [...c].sort((a, b) => a.item.order - b.item.order).map((x) => x.item);
   const education = e.map((x) => x.item).sort((a, b) => a.order - b.order);
-  const experience = [...checkpoints].sort((a, b) => a.order - b.order);
+
+  // The three tracks, in station order
   const station = (track: TrackId, slugs: string[]): TrackStation[] => slugs.map((slug, i) => ({ track, slug, position: i + 1, total: slugs.length }));
+  const staged = projects.filter((x) => x.pipelineStage).sort((a, b) => a.pipelineStage! - b.pipelineStage!);
   const tracks: Record<TrackId, TrackStation[]> = {
-    projects: pipeline.filter((x) => x.kind === "stage").map((x, i, all) => ({ track: "projects" as const, slug: x.slug, position: i + 1, total: all.length, stageLabel: x.label })),
-    experience: station("experience", experience.map((x) => x.slug)),
+    projects: staged.map((x, i) => ({ track: "projects" as const, slug: x.slug, position: i + 1, total: staged.length, stageLabel: stageLabels[x.pipelineStage! - 1] })),
+    experience: station("experience", checkpoints.map((x) => x.slug)),
     education: station("education", education.map((x) => x.slug)),
   };
-  return { profile: profile!, projects, checkpoints, experience, education, pipeline, tracks };
+  return { profile: profile!, projects, checkpoints, education, tracks };
 }
 
 export const content = build();

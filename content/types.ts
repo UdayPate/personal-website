@@ -53,19 +53,8 @@ export type Checkpoint = {
   title: string;
   dates: string;
   bullets: string[];
-  /** The checkpoint sits on the belt right after this stage (1-4). */
-  afterStage: number;
   /** The Markdown body of the file (optional; not shown on the site yet). */
   details: string;
-};
-
-export type PipelineItem = {
-  kind: "stage" | "checkpoint";
-  /** 1-5 for stages; undefined for checkpoints */
-  stage?: number;
-  label: string;
-  /** slug of the project or checkpoint file */
-  slug: string;
 };
 
 export type EducationKind = "degree" | "certificate" | "award" | "course";
