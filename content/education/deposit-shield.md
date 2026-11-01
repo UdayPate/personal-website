@@ -6,6 +6,8 @@ institution: "UC Berkeley x DeepMind"
 dates: "Sept 2026"
 award: "5th place"
 project: "Deposit Shield"
+role: "Engineer: owned data processing and data storage"
+teamSize: 4
 tech:
   - "Gemini"
   - "TypeScript"

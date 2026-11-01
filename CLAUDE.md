@@ -149,9 +149,6 @@ Work one phase at a time. The site must be working and committed at the end of e
 ### Education files (`content/education/<slug>.md`)
 One file per station on the Education track. Required: `kind` (`degree`, `certificate`, `award` or `course`), `order` (whole number, unique in the folder; stations are sorted by it, dates are never parsed), `title`, `institution` (school, issuer or event organizer), and `dates` (free text like `"2025"` or `"expected Dec 2027"`; only a file with `status: "in-progress"` may leave it out). Optional: `courses` (list), `certificate` (path in `public/` ending in `.png`, `.jpg`, `.jpeg`, `.webp`, `.svg` or `.pdf`; the build fails if the file does not exist), `status` (only `"in-progress"`), `award` (text like `"5th place"`; required for `kind: award`, not allowed otherwise), `project`, `role`, `teamSize` (whole number >= 1), `tech` (list), `links` (`github`, `demo`, `screenshots`, full https addresses). The Markdown body holds optional details. File names are lowercase-with-dashes and must be unique across projects, experience and education. Unknown fields and every mistake above fail the build and name the file.
 
-### Content still to fill in
-- `content/education/deposit-shield.md`: `role` (what Uday built) and `teamSize`. Left out on purpose; add them as optional frontmatter lines when known.
-
 ### How to add a project
 1. Create `content/projects/<slug>.md`. The file name is the slug: lowercase letters, digits and dashes (it becomes `/projects/<slug>` and the `#slug` anchor).
 2. Frontmatter (between `---` lines). Required: `title`, `summary` (list of 1-4 short bullets using only facts from the body), `tech` (list). Optional: `dates`, `problem` (one line), `highlight`, `links` (`github`, `demo`, `screenshots`: full `https://` addresses; the buttons appear automatically). Plus exactly one of:
